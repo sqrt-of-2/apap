@@ -150,8 +150,10 @@ noncomputable instance : Top (BohrSet G) where
   top.ewidth := ⊤
   top.mem_frequencies := by simp
 
+instance : Preorder (BohrSet G) := .lift ewidth
+
 noncomputable instance : DistribLattice (BohrSet G) :=
-  ewidth_injective.distribLattice BohrSet.ewidth (fun _ _ ↦ rfl) (fun _ _ ↦ rfl)
+  ewidth_injective.distribLattice BohrSet.ewidth .rfl .rfl (fun _ _ ↦ rfl) (fun _ _ ↦ rfl)
 
 lemma le_iff_ewidth {B₁ B₂ : BohrSet G} : B₁ ≤ B₂ ↔ ∀ ⦃ψ⦄, B₁.ewidth ψ ≤ B₂.ewidth ψ := Iff.rfl
 
@@ -212,8 +214,7 @@ noncomputable instance [Finite G] : InfSet (BohrSet G) where
 noncomputable def minimalAxioms [Finite G] :
     CompletelyDistribLattice.MinimalAxioms (BohrSet G) :=
   ewidth_injective.completelyDistribLatticeMinimalAxioms .of BohrSet.ewidth
-    (fun _ _ => rfl)
-    (fun _ _ => rfl)
+    .rfl .rfl (fun _ _ ↦ rfl) (fun _ _ ↦ rfl)
     (fun B => by
       ext ψ
       simp only [iSup_apply]
