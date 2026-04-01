@@ -24,6 +24,7 @@ import Mathlib.Algebra.Order.Floor.Semifield
 import Mathlib.Analysis.Complex.ExponentialBounds
 import Mathlib.Data.Real.StarOrdered
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
+import Mathlib.FieldTheory.Finiteness
 
 /-!
 # Finite field case
@@ -103,6 +104,7 @@ private lemma curlog_rpow_le (hx₀ : 0 < x) (hy : 1 ≤ y) : 𝓛 (x ^ y) ≤ y
 private lemma curlog_pow_le {n : ℕ} (hx₀ : 0 < x) (hn : n ≠ 0) : 𝓛 (x ^ n) ≤ n * 𝓛 x := by
   rw [← rpow_natCast]; exact curlog_rpow_le hx₀ <| mod_cast Nat.one_le_iff_ne_zero.2 hn
 
+set_option backward.isDefEq.respectTransparency false in
 lemma global_dichotomy [DecidableEq G] [MeasurableSpace G] [DiscreteMeasurableSpace G]
     (hA : A.Nonempty) (hγC : γ ≤ C.dens) (hγ : 0 < γ)
     (hAC : ε ≤ |card G * ⟪μ_[ℝ] A ∗ μ A, μ C⟫_[ℝ] - 1|) :
@@ -262,6 +264,7 @@ lemma ap_in_ff' [DecidableEq G] (hq₃ : 3 ≤ q) (hq : q.Prime) (hα₀ : 0 < �
           |∑ x ∈ S, (μ (Set.toFinset V) ∗ μ A₁ ○ μ A₂) x - ∑ x ∈ S, (μ A₁ ○ μ A₂) x| ≤ ε := by
   simpa [← conjneg_mu] using ap_in_ff S hq₃ hq (A₂ := -A₂) hα₀ hα₂ hε₀ hε₁ hαA₁ (by simpa)
 
+set_option backward.isDefEq.respectTransparency false in
 set_option linter.flexible false in
 set_option maxHeartbeats 400000 in
 -- FIXME: Get rid of raised heartbeats

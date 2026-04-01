@@ -5,6 +5,7 @@ public import Mathlib.Analysis.RCLike.Inner
 
 import APAP.Prereqs.Inner.Hoelder.Discrete
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
+import Mathlib.Tactic.Positivity
 
 /-! # Inner product -/
 
@@ -25,9 +26,11 @@ variable [RCLike 𝕜] {mι : MeasurableSpace ι} [DiscreteMeasurableSpace ι] {
   simp_rw [← algebraMap.coe_pow]
   simp [cL2Norm_sq_eq_expect_norm, wInner_cWeight_eq_expect]
 
+set_option backward.isDefEq.respectTransparency false in
 lemma cL1Norm_mul (f g : ι → 𝕜) : ‖f * g‖ₙ_[1] = ⟪fun i ↦ ‖f i‖, fun i ↦ ‖g i‖⟫ₙ_[ℝ] := by
   simp [wInner_cWeight_eq_expect, cL1Norm_eq_expect_norm, mul_comm]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Cauchy-Schwarz inequality** -/
 lemma wInner_cWeight_le_cL2Norm_mul_cL2Norm (f g : ι → ℝ) : ⟪f, g⟫ₙ_[ℝ] ≤ ‖f‖ₙ_[2] * ‖g‖ₙ_[2] := by
   simp only [wInner_cWeight_eq_smul_wInner_one, ← NNRat.cast_smul_eq_nnqsmul ℝ≥0, NNRat.cast_inv,
@@ -80,6 +83,7 @@ section Hoelder
 variable {α : Type*} {mα : MeasurableSpace α} [DiscreteMeasurableSpace α] [Fintype α] [RCLike 𝕜]
   {p q r : ℝ≥0∞} {f g : α → 𝕜}
 
+set_option backward.isDefEq.respectTransparency false in
 lemma norm_wInner_cWeight_le (f g : α → 𝕜) :
     ‖⟪f, g⟫ₙ_[𝕜]‖₊ ≤ ⟪fun a ↦ ‖f a‖, fun a ↦ ‖g a‖⟫ₙ_[ℝ] := by
   simpa [wInner_cWeight_eq_expect, norm_mul, mul_comm]
@@ -97,6 +101,7 @@ omit [Fintype α]
 
 variable [Finite α]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Hölder's inequality**, binary case. -/
 lemma cLpNorm_mul_le (p q : ℝ≥0∞) (hr₀ : r ≠ 0) [hpqr : ENNReal.HolderTriple p q r] :
     ‖f * g‖ₙ_[r] ≤ ‖f‖ₙ_[p] * ‖g‖ₙ_[q] := by

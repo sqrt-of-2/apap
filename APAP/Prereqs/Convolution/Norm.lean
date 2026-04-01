@@ -8,6 +8,7 @@ import APAP.Prereqs.LpNorm.Discrete.Basic
 import Mathlib.Algebra.Order.Star.Conjneg
 import Mathlib.Data.Real.StarOrdered
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
+import Mathlib.Tactic.Positivity
 
 /-!
 # Norm of a convolution

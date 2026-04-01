@@ -37,6 +37,7 @@ notation "‖" f "‖_[" p ", " w "]" => wLpNorm p w f
 lemma wLpNorm_sub_comm (w : α → ℝ≥0) (f g : α → E) : ‖f - g‖_[p, w] = ‖g - f‖_[p, w] := by
   simp [wLpNorm, lpNorm_sub_comm]
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp] lemma wLpNorm_one_eq_dLpNorm (p : ℝ≥0∞) (f : α → E) : ‖f‖_[p, 1] = ‖f‖_[p] := by
   simp only [wLpNorm, lpNorm, Pi.one_apply, one_smul, dLpNorm, Measure.count]
   congr!
@@ -63,12 +64,14 @@ end RCLike
 
 variable [Finite α]
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp] lemma wLpNorm_const_right (hp : p ≠ ∞) (w : ℝ≥0) (f : α → E) :
     ‖f‖_[p, const _ w] = w ^ p.toReal⁻¹ * ‖f‖_[p] := by
   cases nonempty_fintype α
   simp [wLpNorm, dLpNorm, ← Finset.smul_sum, lpNorm_smul_measure_of_ne_top hp, Measure.count,
     NNReal.smul_def]
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp] lemma wLpNorm_smul_right (hp : p ≠ ⊤) (c : ℝ≥0) (f : α → E) :
     ‖f‖_[p, c • w] = c ^ p.toReal⁻¹ * ‖f‖_[p, w] := by
   cases nonempty_fintype α

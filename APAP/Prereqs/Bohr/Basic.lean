@@ -211,6 +211,8 @@ noncomputable instance [Finite G] : InfSet (BohrSet G) where
     mem_frequencies := by simp
   }
 
+-- Fixed in https://github.com/leanprover-community/mathlib4/pull/37478.
+set_option backward.isDefEq.respectTransparency false in
 noncomputable def minimalAxioms [Finite G] :
     CompletelyDistribLattice.MinimalAxioms (BohrSet G) :=
   ewidth_injective.completelyDistribLatticeMinimalAxioms .of BohrSet.ewidth
@@ -244,6 +246,7 @@ variable {ρ : ℝ}
 lemma nnreal_smul_lt_top {x : ℝ≥0} {y : ℝ≥0∞} (hy : y < ⊤) : x • y < ⊤ :=
   ENNReal.mul_lt_top (by simp) hy
 
+set_option backward.isDefEq.respectTransparency false in
 lemma nnreal_smul_lt_top_iff {x : ℝ≥0} {y : ℝ≥0∞} (hx : x ≠ 0) : x • y < ⊤ ↔ y < ⊤ := by
   constructor
   case mpr => exact nnreal_smul_lt_top
@@ -256,6 +259,7 @@ lemma nnreal_smul_lt_top_iff {x : ℝ≥0} {y : ℝ≥0∞} (hx : x ≠ 0) : x �
 lemma nnreal_smul_ne_top {x : ℝ≥0} {y : ℝ≥0∞} (hy : y ≠ ⊤) : x • y ≠ ⊤ :=
   ENNReal.mul_ne_top (by simp) hy
 
+set_option backward.isDefEq.respectTransparency false in
 lemma nnreal_smul_ne_top_iff {x : ℝ≥0} {y : ℝ≥0∞} (hx : x ≠ 0) : x • y ≠ ⊤ ↔ y ≠ ⊤ := by
   constructor
   case mpr => exact nnreal_smul_ne_top

@@ -22,9 +22,11 @@ variable [RCLike 𝕜] {mι : MeasurableSpace ι} [DiscreteMeasurableSpace ι] {
   simp_rw [← algebraMap.coe_pow]
   simp [dL2Norm_sq_eq_sum_norm, wInner_one_eq_sum]
 
+set_option backward.isDefEq.respectTransparency false in
 lemma dL1Norm_mul (f g : ι → 𝕜) : ‖f * g‖_[1] = ⟪fun i ↦ ‖f i‖, fun i ↦ ‖g i‖⟫_[ℝ] := by
   simp [wInner_one_eq_sum, dL1Norm_eq_sum_norm, mul_comm]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Cauchy-Schwarz inequality** -/
 lemma wInner_one_le_dL2Norm_mul_dL2Norm (f g : ι → ℝ) : ⟪f, g⟫_[ℝ] ≤ ‖f‖_[2] * ‖g‖_[2] := by
   simpa [dL2Norm_eq_sum_norm, PiLp.norm_eq_of_L2, sqrt_eq_rpow, wInner_one_eq_inner]
@@ -60,6 +62,7 @@ section Hoelder
 variable {α : Type*} {mα : MeasurableSpace α} [DiscreteMeasurableSpace α] [Fintype α] [RCLike 𝕜]
   {p q r : ℝ≥0∞} {f g : α → 𝕜}
 
+set_option backward.isDefEq.respectTransparency false in
 lemma norm_wInner_one_le (f g : α → 𝕜) : ‖⟪f, g⟫_[𝕜]‖₊ ≤ ⟪fun a ↦ ‖f a‖, fun a ↦ ‖g a‖⟫_[ℝ] :=
   (norm_sum_le _ _).trans <| by simp [wInner_one_eq_sum]
 

@@ -67,6 +67,7 @@ lemma rudin_exp_abs_ineq (f : G → ℂ) (hf : AddDissociated <| support <| cft 
         add_le_add (rudin_exp_ineq f hf) (rudin_exp_ineq (-f) <| by simpa using hf)
     _ = _ := by simp [two_mul]
 
+set_option backward.isDefEq.respectTransparency false in
 private lemma rudin_ineq_aux (hp : 2 ≤ p) (f : G → ℂ) (hf : AddDissociated <| support <| cft f) :
     ‖re ∘ f‖ₙ_[p] ≤ 2 * exp 2⁻¹ * sqrt p * ‖f‖ₙ_[2] := by
   wlog hfp : ‖f‖ₙ_[2] = sqrt p with H

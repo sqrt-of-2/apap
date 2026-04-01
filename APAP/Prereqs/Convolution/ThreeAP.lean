@@ -16,6 +16,7 @@ open scoped Pointwise mu
 
 variable {G : Type*} [AddCommGroup G] [DecidableEq G] [Fintype G] {s : Finset G}
 
+set_option backward.isDefEq.respectTransparency false in
 lemma ThreeAPFree.wInner_one_mu_conv_mu_mu_two_smul_mu (hG : Odd (card G))
     (hs : ThreeAPFree (s : Set G)) :
     ⟪μ_[ℝ] s ∗ μ s, μ (s.image (2 • ·))⟫_[ℝ] = (#s ^ 2 : ℝ)⁻¹ := by
