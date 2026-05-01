@@ -1,8 +1,8 @@
 module
 
-public import APAP.Prereqs.Function.Indicator.Defs
 public import APAP.Prereqs.LpNorm.Compact
 public import APAP.Prereqs.LpNorm.Discrete.Defs
+public import APAP.Prereqs.Mu
 public import Mathlib.Algebra.Group.Translate
 public import Mathlib.Algebra.Star.Conjneg
 
@@ -16,7 +16,7 @@ import Mathlib.Tactic.Positivity.Finset
 public section
 
 open Finset Function Real
-open scoped BigOperators ComplexConjugate ENNReal NNReal translate mu
+open scoped BigOperators ComplexConjugate ENNReal NNReal Indicator translate mu
 
 namespace MeasureTheory
 variable {ι G 𝕜 E R : Type*} [Finite ι] {mι : MeasurableSpace ι} [DiscreteMeasurableSpace ι]
@@ -30,33 +30,36 @@ lemma cLpNorm_pow_eq_card_inv_mul_dLpNorm_pow [Fintype ι] {n : ℕ} (hn₀ : n 
 /-! ### Indicator -/
 
 section Indicator
-variable [RCLike R] [DecidableEq ι] {s : Finset ι} {p : ℝ≥0}
+variable [RCLike R] {s : Finset ι} {p : ℝ≥0}
 
-lemma dLpNorm_rpow_indicate (hp : p ≠ 0) (s : Finset ι) : ‖𝟭_[R] s‖_[p] ^ (p : ℝ) = #s := by
+lemma dLpNorm_rpow_indicator_one (hp : p ≠ 0) (s : Finset ι) :
+    ‖𝟭_[(s : Set ι), R]‖_[p] ^ (p : ℝ) = #s := by
+  classical
   cases nonempty_fintype ι
   have : ∀ x, (ite (x ∈ s) 1 0 : ℝ) ^ (p : ℝ) =
     ite (x ∈ s) (1 ^ (p : ℝ)) (0 ^ (p : ℝ)) := fun x ↦ by split_ifs <;> simp
-  simp [dLpNorm_rpow_eq_sum_norm, hp, indicate_apply, apply_ite norm, -sum_const,
+  simp [dLpNorm_rpow_eq_sum_norm, hp, Set.indicator_apply, apply_ite norm, -sum_const,
     card_eq_sum_ones]
 
-lemma dLpNorm_indicate (hp : p ≠ 0) (s : Finset ι) : ‖𝟭_[R] s‖_[p] = #s ^ (p⁻¹ : ℝ) := by
-  refine (eq_rpow_inv ?_ ?_ ?_).2 (dLpNorm_rpow_indicate ?_ _) <;> positivity
+lemma dLpNorm_indicator_one (hp : p ≠ 0) (s : Finset ι) :
+    ‖𝟭_[(s : Set ι), R]‖_[p] = #s ^ (p⁻¹ : ℝ) := by
+  refine (eq_rpow_inv ?_ ?_ ?_).2 (dLpNorm_rpow_indicator_one ?_ _) <;> positivity
 
-lemma dLpNorm_pow_indicate {p : ℕ} (hp : p ≠ 0) (s : Finset ι) :
-    ‖𝟭_[R] s‖_[p] ^ (p : ℝ) = #s := by
-  simpa using dLpNorm_rpow_indicate (Nat.cast_ne_zero.2 hp) s
+lemma dLpNorm_pow_indicator_one {p : ℕ} (hp : p ≠ 0) (s : Finset ι) :
+    ‖𝟭_[(s : Set ι), R]‖_[p] ^ (p : ℝ) = #s := by
+  simpa using dLpNorm_rpow_indicator_one (Nat.cast_ne_zero.2 hp) s
 
-lemma dL2Norm_sq_indicate (s : Finset ι) : ‖𝟭_[R] s‖_[2] ^ 2 = #s := by
-  simpa using dLpNorm_pow_indicate two_ne_zero s
+lemma dL2Norm_sq_indicator_one (s : Finset ι) : ‖𝟭_[(s : Set ι), R]‖_[2] ^ 2 = #s := by
+  simpa using dLpNorm_pow_indicator_one two_ne_zero s
 
-@[simp] lemma dL2Norm_indicate (s : Finset ι) : ‖𝟭_[R] s‖_[2] = Real.sqrt #s := by
-  rw [eq_comm, sqrt_eq_iff_eq_sq, dL2Norm_sq_indicate] <;> positivity
+@[simp] lemma dL2Norm_indicator_one (s : Finset ι) : ‖𝟭_[(s : Set ι), R]‖_[2] = Real.sqrt #s := by
+  rw [eq_comm, sqrt_eq_iff_eq_sq, dL2Norm_sq_indicator_one] <;> positivity
 
-@[simp] lemma dL1Norm_indicate (s : Finset ι) : ‖𝟭_[R] s‖_[1] = #s := by
-  simpa using dLpNorm_pow_indicate one_ne_zero s
+@[simp] lemma dL1Norm_indicator_one (s : Finset ι) : ‖𝟭_[(s : Set ι), R]‖_[1] = #s := by
+  simpa using dLpNorm_pow_indicator_one one_ne_zero s
 
 lemma dLpNorm_mu (hp : 1 ≤ p) (hs : s.Nonempty) : ‖μ_[R] s‖_[p] = #s ^ ((p : ℝ)⁻¹ - 1) := by
-  rw [mu, dLpNorm_const_smul ((#s)⁻¹ : R) (𝟭_[R] s), dLpNorm_indicate, norm_inv,
+  rw [mu, dLpNorm_const_smul ((#s)⁻¹ : R) (𝟭_[(s : Set ι), R]), dLpNorm_indicator_one, norm_inv,
     RCLike.norm_natCast, inv_mul_eq_div, ← Real.rpow_sub_one] <;> positivity
 
 lemma dLpNorm_mu_le (hp : 1 ≤ p) : ‖μ_[R] s‖_[p] ≤ #s ^ (p⁻¹ - 1 : ℝ) := by

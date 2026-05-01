@@ -1,9 +1,9 @@
 module
 
-public import Mathlib.Combinatorics.Additive.DoublingConst
 public import APAP.Prereqs.Convolution.Discrete.Defs
-public import APAP.Prereqs.Function.Indicator.Defs
 public import APAP.Prereqs.LpNorm.Discrete.Defs
+public import APAP.Prereqs.Mu
+public import Mathlib.Combinatorics.Additive.DoublingConst
 
 import APAP.Prereqs.Convolution.Discrete.Basic
 import APAP.Prereqs.Convolution.Norm
@@ -21,7 +21,7 @@ import Mathlib.MeasureTheory.Integral.Bochner.Basic
 # Almost-periodicity
 -/
 
-open scoped Pointwise Combinatorics.Additive translate mu
+open scoped Pointwise Combinatorics.Additive Indicator translate mu
 
 namespace Finset
 variable {α : Type*} [DecidableEq α] {s : Finset α} {k : ℕ}
@@ -137,16 +137,16 @@ variable [DecidableEq G] [AddCommGroup G]
 local notation:70 s:70 " ^^ " n:71 => Fintype.piFinset fun _ : Fin n ↦ s
 
 lemma lemma28_part_one (hm : 1 ≤ m) (x : G) :
-    ∑ a ∈ A ^^ k, ‖∑ i, f (x - a i) - (k • (mu A ∗ f)) x‖ ^ (2 * m) ≤
+    ∑ a ∈ A ^^ k, ‖∑ i, f (x - a i) - (k • (mu A ∗ᵈ f)) x‖ ^ (2 * m) ≤
       (8 * m) ^ m * k ^ (m - 1) *
-        ∑ a ∈ A ^^ k, ∑ i, ‖f (x - a i) - (mu A ∗ f) x‖ ^ (2 * m) := by
-  let f' : G → ℂ := fun a ↦ f (x - a) - (mu A ∗ f) x
+        ∑ a ∈ A ^^ k, ∑ i, ‖f (x - a i) - (mu A ∗ᵈ f) x‖ ^ (2 * m) := by
+  let f' : G → ℂ := fun a ↦ f (x - a) - (mu A ∗ᵈ f) x
   refine (RCLike.marcinkiewicz_zygmund (by linarith only [hm]) f' ?_).trans_eq' ?_
   · intro i
     rw [Fintype.sum_piFinset_apply, sum_sub_distrib]
     simp only [sum_const]
-    rw [← Pi.smul_apply (card A), ← smul_conv, card_smul_mu, conv_eq_sum_sub']
-    simp only [boole_mul, indicate_apply]
+    rw [← Pi.smul_apply (card A), ← smul_ddconv, card_smul_mu, ddconv_eq_sum_sub']
+    simp only [boole_mul, Set.indicator_apply, mem_coe]
     rw [← sum_filter, filter_mem_eq_inter, univ_inter, sub_self, smul_zero]
   congr with a : 1
   simp only [sum_sub_distrib, Pi.smul_apply, sum_const, card_fin, f']
@@ -231,7 +231,7 @@ variable [MeasurableSpace G]
 namespace AlmostPeriodicity
 
 def LProp (k m : ℕ) (ε : ℝ) (f : G → ℂ) (A : Finset G) (a : Fin k → G) : Prop :=
-  ‖fun x : G ↦ ∑ i, f (x - a i) - (k • (μ A ∗ f)) x‖_[2 * m] ≤ k * ε * ‖f‖_[2 * m]
+  ‖fun x : G ↦ ∑ i, f (x - a i) - (k • (μ A ∗ᵈ f)) x‖_[2 * m] ≤ k * ε * ‖f‖_[2 * m]
 
 noncomputable instance : DecidablePred (LProp k m ε f A) := Classical.decPred _
 
@@ -240,7 +240,7 @@ noncomputable def l (k m : ℕ) (ε : ℝ) (f : G → ℂ) (A : Finset G) : Fins
 
 lemma lemma28_markov (hε : 0 < ε) (hm : 1 ≤ m)
     (h : ∑ a ∈ A ^^ k,
-        (‖fun x : G ↦ ∑ i : Fin k, f (x - a i) - (k • (mu A ∗ f)) x‖_[2 * m] ^ (2 * m) : ℝ) ≤
+        (‖fun x : G ↦ ∑ i : Fin k, f (x - a i) - (k • (mu A ∗ᵈ f)) x‖_[2 * m] ^ (2 * m) : ℝ) ≤
       1 / 2 * (k * ε * ‖f‖_[2 * m]) ^ (2 * m) * #A ^ k) :
     (#A ^ k : ℝ) / 2 ≤ #(l k m ε f A) := by
   rw [← Nat.cast_pow, ← Fintype.card_piFinset_const] at h
@@ -256,7 +256,7 @@ variable [DiscreteMeasurableSpace G]
 
 open MeasureTheory in
 lemma lemma28_part_two (hm : 1 ≤ m) (hA : A.Nonempty) :
-    (8 * m) ^ m * k ^ (m - 1) * ∑ a ∈ A ^^ k, ∑ i, ‖τ (a i) f - mu A ∗ f‖_[2 * m] ^ (2 * m) ≤
+    (8 * m) ^ m * k ^ (m - 1) * ∑ a ∈ A ^^ k, ∑ i, ‖τ (a i) f - mu A ∗ᵈ f‖_[2 * m] ^ (2 * m) ≤
       (8 * m) ^ m * k ^ (m - 1) * ∑ _a ∈ A ^^ k, ∑ _i : Fin k, (2 * ‖f‖_[2 * m]) ^ (2 * m) := by
   -- lots of the equalities about m can be automated but it's *way* slower
   have hmeq : ((2 * m : ℕ) : ℝ≥0∞) = 2 * m := by rw [Nat.cast_mul, Nat.cast_two]
@@ -270,8 +270,8 @@ lemma lemma28_part_two (hm : 1 ≤ m) (hA : A.Nonempty) :
   have : (1 : ℝ≥0) < 2 * m := by
     rw [← Nat.cast_two, ← Nat.cast_mul, Nat.one_lt_cast]
     exact hm'
-  rw [← hmeq', conv_comm]
-  refine (dLpNorm_conv_le this.le _ _).trans ?_
+  rw [← hmeq', ddconv_comm]
+  refine (dLpNorm_ddconv_le this.le _ _).trans ?_
   rw [dL1Norm_mu hA, mul_one]
 
 open MeasureTheory in
@@ -292,20 +292,20 @@ lemma lemma28 (hε : 0 < ε) (hm : 1 ≤ m) (hk : (64 : ℝ) * m / ε ^ 2 ≤ k)
   simp only [dLpNorm_pow_eq_sum_norm hm']
   rw [sum_comm]
   have : ∀ x : G, ∑ a ∈ A ^^ k,
-      ‖∑ i, f (x - a i) - (k • (mu A ∗ f)) x‖ ^ (2 * m) ≤
+      ‖∑ i, f (x - a i) - (k • (mu A ∗ᵈ f)) x‖ ^ (2 * m) ≤
     (8 * m) ^ m * k ^ (m - 1) *
-      ∑ a ∈ A ^^ k, ∑ i, ‖f (x - a i) - (mu A ∗ f) x‖ ^ (2 * m) :=
+      ∑ a ∈ A ^^ k, ∑ i, ‖f (x - a i) - (mu A ∗ᵈ f) x‖ ^ (2 * m) :=
     lemma28_part_one hm
   refine (sum_le_sum fun x _ ↦ this x).trans ?_
   rw [← mul_sum]
   simp only [@sum_comm _ _ G]
   have (a : Fin k → G) (i : Fin k) :
-      ∑ x, ‖f (x - a i) - (mu A ∗ f) x‖ ^ (2 * m) = ‖τ (a i) f - mu A ∗ f‖_[2 * m] ^ (2 * m) := by
+      ∑ x, ‖f (x - a i) - (mu A ∗ᵈ f) x‖ ^ (2 * m) = ‖τ (a i) f - mu A ∗ᵈ f‖_[2 * m] ^ (2 * m) := by
     rw [← hmeq, dLpNorm_pow_eq_sum_norm hm']
     simp only [Pi.sub_apply, translate_apply]
   simp only [this]
   have :
-    (8 * m) ^ m * k ^ (m - 1) * ∑ a ∈ A ^^ k, ∑ i, ‖τ (a i) f - mu A ∗ f‖_[2 * m] ^ (2 * m) ≤
+    (8 * m) ^ m * k ^ (m - 1) * ∑ a ∈ A ^^ k, ∑ i, ‖τ (a i) f - mu A ∗ᵈ f‖_[2 * m] ^ (2 * m) ≤
       (8 * m) ^ m * k ^ (m - 1) * ∑ a ∈ A ^^ k, ∑ i, (2 * ‖f‖_[2 * m]) ^ (2 * m) :=
     lemma28_part_two hm hA
   refine le_trans (mod_cast this) ?_
@@ -314,13 +314,13 @@ lemma lemma28 (hε : 0 < ε) (hm : 1 ≤ m) (hk : (64 : ℝ) * m / ε ^ 2 ≤ k)
 open MeasureTheory in
 lemma just_the_triangle_inequality {t : G} {a : Fin k → G} (ha : a ∈ l k m ε f A)
     (ha' : (a + fun _ ↦ t) ∈ l k m ε f A) (hk : 0 < k) (hm : 1 ≤ m) :
-    ‖τ (-t) (mu A ∗ f) - mu A ∗ f‖_[2 * m] ≤ 2 * ε * ‖f‖_[2 * m] := by
+    ‖τ (-t) (mu A ∗ᵈ f) - mu A ∗ᵈ f‖_[2 * m] ≤ 2 * ε * ‖f‖_[2 * m] := by
   let f₁ : G → ℂ := fun x ↦ ∑ i, f (x - a i)
   let f₂ : G → ℂ := fun x ↦ ∑ i, f (x - a i - t)
   have hp : (1 : ℝ≥0∞) ≤ 2 * m := by norm_cast; linarith
-  have h₁ : ‖f₁ - k • (mu A ∗ f)‖_[2 * m] ≤ k * ε * ‖f‖_[2 * m] := by
+  have h₁ : ‖f₁ - k • (mu A ∗ᵈ f)‖_[2 * m] ≤ k * ε * ‖f‖_[2 * m] := by
     rw [l, Finset.mem_filter] at ha ; exact ha.2
-  have h₂ : ‖f₂ - k • (mu A ∗ f)‖_[2 * m] ≤ k * ε * ‖f‖_[2 * m] := by
+  have h₂ : ‖f₂ - k • (mu A ∗ᵈ f)‖_[2 * m] ≤ k * ε * ‖f‖_[2 * m] := by
     rw [l, Finset.mem_filter, LProp] at ha'
     refine ha'.2.trans_eq' ?_
     congr with i : 1
@@ -330,21 +330,21 @@ lemma just_the_triangle_inequality {t : G} {a : Fin k → G} (ha : a ∈ l k m �
     rw [translate_apply]
     refine Finset.sum_congr rfl fun j _ ↦ ?_
     rw [sub_right_comm]
-  have h₄₁ : ‖τ t f₁ - k • (mu A ∗ f)‖_[2 * m] = ‖τ (-t) (τ t f₁ - k • (mu A ∗ f))‖_[2 * m] := by
+  have h₄₁ : ‖τ t f₁ - k • (mu A ∗ᵈ f)‖_[2 * m] = ‖τ (-t) (τ t f₁ - k • (mu A ∗ᵈ f))‖_[2 * m] := by
     rw [dLpNorm_translate]
-  have h₄ : ‖τ t f₁ - k • (mu A ∗ f)‖_[2 * m] = ‖f₁ - τ (-t) (k • (mu A ∗ f))‖_[2 * m] := by
+  have h₄ : ‖τ t f₁ - k • (mu A ∗ᵈ f)‖_[2 * m] = ‖f₁ - τ (-t) (k • (mu A ∗ᵈ f))‖_[2 * m] := by
     rw [h₄₁, translate_sub_right, translate_translate]
     simp
-  have h₅₁ : ‖τ (-t) (k • (mu A ∗ f)) - f₁‖_[2 * m] ≤ k * ε * ‖f‖_[2 * m] := by
+  have h₅₁ : ‖τ (-t) (k • (mu A ∗ᵈ f)) - f₁‖_[2 * m] ≤ k * ε * ‖f‖_[2 * m] := by
     rwa [dLpNorm_sub_comm, ← h₄, ← h₃]
   have : (0 : ℝ) < k := by positivity
   refine le_of_mul_le_mul_left ?_ this
-  rw [← nsmul_eq_mul, ← dLpNorm_nsmul _ (_ - mu A ∗ f), nsmul_sub, ←
-    translate_smul_right (-t) (mu A ∗ f) k, mul_assoc, mul_left_comm, two_mul ((k : ℝ) * _), ←
+  rw [← nsmul_eq_mul, ← dLpNorm_nsmul _ (_ - mu A ∗ᵈ f), nsmul_sub, ←
+    translate_smul_right (-t) (mu A ∗ᵈ f) k, mul_assoc, mul_left_comm, two_mul ((k : ℝ) * _), ←
     mul_assoc]
   calc
-    ‖τ (-t) (k • (μ A ∗ f)) - k • (μ A ∗ f)‖_[2 * m]
-      ≤ ‖τ (-t) (k • (μ A ∗ f)) - f₁‖_[2 * m] + ‖f₁ - k • (μ A ∗ f)‖_[2 * m] :=
+    ‖τ (-t) (k • (μ A ∗ᵈ f)) - k • (μ A ∗ᵈ f)‖_[2 * m]
+      ≤ ‖τ (-t) (k • (μ A ∗ᵈ f)) - f₁‖_[2 * m] + ‖f₁ - k • (μ A ∗ᵈ f)‖_[2 * m] :=
       dLpNorm_sub_le_dLpNorm_sub_add_dLpNorm_sub (mod_cast hp)
     _ ≤ k * ε * ‖f‖_[2 * m] + k * ε * ‖f‖_[2 * m] := by gcongr
 
@@ -384,7 +384,7 @@ lemma almost_periodicity (ε : ℝ) (hε : 0 < ε) (hε' : ε ≤ 1) (m : ℕ) (
     (hK₂ : 2 ≤ K) (hK : σ[A, S] ≤ K) :
     ∃ T : Finset G,
       K ^ (-512 * m / ε ^ 2 : ℝ) * #S ≤ #T ∧
-        ∀ t ∈ T, ‖τ t (mu A ∗ f) - mu A ∗ f‖_[2 * m] ≤ ε * ‖f‖_[2 * m] := by
+        ∀ t ∈ T, ‖τ t (mu A ∗ᵈ f) - mu A ∗ᵈ f‖_[2 * m] ≤ ε * ‖f‖_[2 * m] := by
   obtain rfl | hm := m.eq_zero_or_pos
   · exact ⟨S, by simp⟩
   obtain rfl | hA := A.eq_empty_or_nonempty
@@ -396,7 +396,7 @@ lemma almost_periodicity (ε : ℝ) (hε : 0 < ε) (hε' : ε ≤ 1) (m : ℕ) (
       refine (mul_le_mul_of_nonneg_right this (Nat.cast_nonneg _)).trans ?_
       rw [one_mul, Nat.cast_le]
       exact card_le_univ _
-    simp only [mu_empty, zero_conv, translate_zero_right, sub_self, dLpNorm_zero]
+    simp only [mu_empty, zero_ddconv, translate_zero_right, sub_self, dLpNorm_zero]
     positivity
   let k := ⌈(64 : ℝ) * m / (ε / 2) ^ 2⌉₊
   have hk : k ≠ 0 := by positivity
@@ -419,13 +419,13 @@ theorem linfty_almost_periodicity (ε : ℝ) (hε₀ : 0 < ε) (hε₁ : ε ≤ 
     (hK : σ[A, S] ≤ K) (B C : Finset G) (hB : B.Nonempty) (hC : C.Nonempty) :
     ∃ T : Finset G,
       K ^ (-4096 * ⌈𝓛 (#C / #B)⌉ / ε ^ 2) * #S ≤ #T ∧
-      ∀ t ∈ T, ‖τ t (μ_[ℂ] A ∗ 𝟭 B ∗ μ C) - μ A ∗ 𝟭 B ∗ μ C‖_[∞] ≤ ε := by
+      ∀ t ∈ T, ‖τ t (μ_[ℂ] A ∗ᵈ 𝟭_[B] ∗ᵈ μ C) - μ A ∗ᵈ 𝟭_[B] ∗ᵈ μ C‖_[∞] ≤ ε := by
   let r : ℝ := min 1 (#C / #B)
   set m : ℝ := 𝓛 (#C / #B)
   have hm₀ : 0 < m := curlog_pos (by positivity)
   have hm₁ : 1 ≤ ⌈m⌉₊ := Nat.one_le_iff_ne_zero.2 <| by positivity
   obtain ⟨T, hKT, hT⟩ := almost_periodicity (ε / exp 1) (by positivity)
-    (div_le_one_of_le₀ (hε₁.trans <| one_le_exp zero_le_one) <| by positivity) ⌈m⌉₊ (𝟭 B) hK₂ hK
+    (div_le_one_of_le₀ (hε₁.trans <| one_le_exp zero_le_one) <| by positivity) ⌈m⌉₊ (𝟭_[B]) hK₂ hK
   norm_cast at hT
   set M : ℕ := 2 * ⌈m⌉₊
   have hM₀ : (M : ℝ≥0) ≠ 0 := by positivity
@@ -444,24 +444,24 @@ theorem linfty_almost_periodicity (ε : ℝ) (hε₀ : 0 < ε) (hε₁ : ε ≤ 
             _ ≤ _ := by norm_num
       _ = _ := by simp [div_div_eq_mul_div, ← mul_div_right_comm, mul_right_comm, div_pow]
       _ ≤ _ := hKT
-  set F : G → ℂ := τ t (μ A ∗ 𝟭 B) - μ A ∗ 𝟭 B
+  set F : G → ℂ := τ t (μ A ∗ᵈ 𝟭_[B]) - μ A ∗ᵈ 𝟭_[B]
   have (x : G) :=
     calc
-      (τ t (μ A ∗ 𝟭 B ∗ μ C) - μ A ∗ 𝟭 B ∗ μ C : G → ℂ) x
-        = (F ∗ μ C) x := by simp [sub_conv, F]
-      _ = ∑ y, F y * μ C (x - y) := conv_eq_sum_sub' ..
+      (τ t (μ A ∗ᵈ 𝟭_[B] ∗ᵈ μ C) - μ A ∗ᵈ 𝟭_[B] ∗ᵈ μ C : G → ℂ) x
+        = (F ∗ᵈ μ C) x := by simp [sub_ddconv, F]
+      _ = ∑ y, F y * μ C (x - y) := ddconv_eq_sum_sub' ..
       _ = ∑ y, F y * μ (x +ᵥ -C) y := by simp [neg_add_eq_sub]
   rw [MeasureTheory.dLinftyNorm_eq_iSup_norm]
   refine ciSup_le fun x ↦ ?_
   calc
-    ‖(τ t (μ A ∗ 𝟭 B ∗ μ C) - μ A ∗ 𝟭 B ∗ μ C : G → ℂ) x‖
+    ‖(τ t (μ A ∗ᵈ 𝟭_[B] ∗ᵈ μ C) - μ A ∗ᵈ 𝟭_[B] ∗ᵈ μ C : G → ℂ) x‖
       = ‖∑ y, F y * μ (x +ᵥ -C) y‖ := by rw [this]
     _ ≤ ∑ y, ‖F y * μ (x +ᵥ -C) y‖ := norm_sum_le _ _
     _ = ‖F * μ (x +ᵥ -C)‖_[1] := by rw [MeasureTheory.dL1Norm_eq_sum_norm]; rfl
     _ ≤ ‖F‖_[M] * ‖μ_[ℂ] (x +ᵥ -C)‖_[NNReal.conjExponent M] := MeasureTheory.dLpNorm_mul_le  _ _
     _ ≤ ε / exp 1 * #B ^ (M : ℝ)⁻¹ * ‖μ_[ℂ] (x +ᵥ -C)‖_[NNReal.conjExponent M] := by
         gcongr
-        simpa only [← ENNReal.coe_natCast, MeasureTheory.dLpNorm_indicate hM₀] using hT _ ht
+        simpa only [← ENNReal.coe_natCast, MeasureTheory.dLpNorm_indicator_one hM₀] using hT _ ht
     _ = ε * ((#C / #B) ^ (-(M : ℝ)⁻¹) / exp 1) := by
         rw [← mul_comm_div, MeasureTheory.dLpNorm_mu hM.symm.lt.le hC.neg.vadd_finset,
           card_vadd_finset, card_neg, hM.symm.coe.inv_sub_one, div_rpow, mul_assoc]
@@ -491,19 +491,19 @@ public theorem linfty_almost_periodicity_boosted (ε : ℝ) (hε₀ : 0 < ε) (h
     (B C : Finset G) (hB : B.Nonempty) (hC : C.Nonempty) :
     ∃ T : Finset G,
       K ^ (-4096 * ⌈𝓛 (#C / #B)⌉ * k ^ 2/ ε ^ 2) * #S ≤ #T ∧
-      ‖μ T ∗^ k ∗ (μ_[ℂ] A ∗ 𝟭 B ∗ μ C) - μ A ∗ 𝟭 B ∗ μ C‖_[∞] ≤ ε := by
+      ‖μ T ∗ᵈ^ k ∗ᵈ (μ_[ℂ] A ∗ᵈ 𝟭_[B] ∗ᵈ μ C) - μ A ∗ᵈ 𝟭_[B] ∗ᵈ μ C‖_[∞] ≤ ε := by
   obtain ⟨T, hKT, hT⟩ := linfty_almost_periodicity (ε / k) (by positivity)
     (div_le_one_of_le₀ (hε₁.trans <| mod_cast Nat.one_le_iff_ne_zero.2 hk) <| by positivity) hK₂ hK
     _ _ hB hC
   refine ⟨T, by simpa only [div_pow, div_div_eq_mul_div] using hKT, ?_⟩
-  set F := μ_[ℂ] A ∗ 𝟭 B ∗ μ C
+  set F := μ_[ℂ] A ∗ᵈ 𝟭_[B] ∗ᵈ μ C
   have hT' : T.Nonempty := by
     have : (0 : ℝ) < #T := hKT.trans_lt' <| by positivity
     simpa [card_pos] using this
   calc
-    (‖μ T ∗^ k ∗ F - F‖_[∞] : ℝ)
+    (‖μ T ∗ᵈ^ k ∗ᵈ F - F‖_[∞] : ℝ)
       = ‖𝔼 a ∈ T ^^ k, (τ (∑ i, a i) F - F)‖_[∞] := by
-        rw [mu_iterConv_conv, expect_sub_distrib, expect_const hT'.piFinset_const]
+        rw [mu_iterConv_ddconv, expect_sub_distrib, expect_const hT'.piFinset_const]
     _ ≤ 𝔼 a ∈ T ^^ k, ‖τ (∑ i, a i) F - F‖_[∞] := MeasureTheory.dLpNorm_expect_le le_top
     _ ≤ 𝔼 _a ∈ T ^^ k, ε := ?_
     _ = ε := by rw [expect_const hT'.piFinset_const]

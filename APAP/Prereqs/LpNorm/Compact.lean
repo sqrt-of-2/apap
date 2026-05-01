@@ -1,10 +1,10 @@
 module
 
-public import APAP.Prereqs.Function.Indicator.Defs
 public import Mathlib.Algebra.Group.Translate
 public import Mathlib.Algebra.Star.Conjneg
 public import Mathlib.MeasureTheory.Function.LpSeminorm.Defs
 
+import AddCombi.Mathlib.Algebra.Notation.Indicator
 import APAP.Mathlib.Analysis.RCLike.Basic
 import Mathlib.MeasureTheory.Function.LpSeminorm.LpNorm
 import Mathlib.MeasureTheory.Integral.Bochner.SumMeasure
@@ -19,7 +19,7 @@ import Mathlib.Tactic.DepRewrite
 open Finset hiding card
 open Function ProbabilityTheory Real
 open Fintype (card)
-open scoped BigOperators ComplexConjugate ENNReal NNReal translate
+open scoped BigOperators ComplexConjugate ENNReal NNReal Indicator translate
 
 local notation:70 s:70 " ^^ " n:71 => Fintype.piFinset fun _ : Fin n ↦ s
 
@@ -342,31 +342,35 @@ variable {ι G 𝕜 E R : Type*} [Fintype ι] {mι : MeasurableSpace ι} [Discre
 /-! ### Indicator -/
 
 section Indicator
-variable [RCLike R] [DecidableEq ι] {s : Finset ι} {p : ℝ≥0}
+variable [RCLike R] {s : Finset ι} {p : ℝ≥0}
 
-lemma cLpNorm_rpow_indicate (hp : p ≠ 0) (s : Finset ι) : ‖𝟭_[R] s‖ₙ_[p] ^ (p : ℝ) = s.dens := by
+lemma cLpNorm_rpow_indicator_one (hp : p ≠ 0) (s : Finset ι) :
+    ‖𝟭_[(s : Set ι), R]‖ₙ_[p] ^ (p : ℝ) = s.dens := by
+  classical
   obtain rfl | hs := s.eq_empty_or_nonempty
   · simpa [Real.rpow_eq_zero_iff_of_nonneg]
   have : ∀ x, (ite (x ∈ s) 1 0 : ℝ) ^ (p : ℝ) =
     ite (x ∈ s) (1 ^ (p : ℝ)) (0 ^ (p : ℝ)) := fun x ↦ by split_ifs <;> simp
-  simp [cLpNorm_rpow_eq_expect_norm, hp, indicate_apply, apply_ite norm, expect_const,
+  simp [cLpNorm_rpow_eq_expect_norm, hp, Set.indicator_apply, apply_ite norm, expect_const,
     nnratCast_dens, hs]
 
-lemma cLpNorm_indicate (hp : p ≠ 0) (s : Finset ι) : ‖𝟭_[R] s‖ₙ_[p] = s.dens ^ (p⁻¹ : ℝ) := by
-  refine (eq_rpow_inv ?_ ?_ ?_).2 (cLpNorm_rpow_indicate ?_ _) <;> positivity
+lemma cLpNorm_indicator_one (hp : p ≠ 0) (s : Finset ι) :
+    ‖𝟭_[(s : Set ι), R]‖ₙ_[p] = s.dens ^ (p⁻¹ : ℝ) := by
+  refine (eq_rpow_inv ?_ ?_ ?_).2 (cLpNorm_rpow_indicator_one ?_ _) <;> positivity
 
-lemma cLpNorm_pow_indicate {p : ℕ} (hp : p ≠ 0) (s : Finset ι) :
-    ‖𝟭_[R] s‖ₙ_[p] ^ (p : ℝ) = s.dens := by
-  simpa using cLpNorm_rpow_indicate (Nat.cast_ne_zero.2 hp) s
+lemma cLpNorm_pow_indicator_one {p : ℕ} (hp : p ≠ 0) (s : Finset ι) :
+    ‖𝟭_[(s : Set ι), R]‖ₙ_[p] ^ (p : ℝ) = s.dens := by
+  simpa using cLpNorm_rpow_indicator_one (Nat.cast_ne_zero.2 hp) s
 
-lemma cL2Norm_sq_indicate (s : Finset ι) : ‖𝟭_[R] s‖ₙ_[2] ^ 2 = s.dens := by
-  simpa using cLpNorm_pow_indicate two_ne_zero s
+lemma cL2Norm_sq_indicator_one (s : Finset ι) : ‖𝟭_[(s : Set ι), R]‖ₙ_[2] ^ 2 = s.dens := by
+  simpa using cLpNorm_pow_indicator_one two_ne_zero s
 
-@[simp] lemma cL2Norm_indicate (s : Finset ι) : ‖𝟭_[R] s‖ₙ_[2] = Real.sqrt s.dens := by
-  rw [eq_comm, sqrt_eq_iff_eq_sq, cL2Norm_sq_indicate] <;> positivity
+@[simp]
+lemma cL2Norm_indicator_one (s : Finset ι) : ‖𝟭_[(s : Set ι), R]‖ₙ_[2] = Real.sqrt s.dens := by
+  rw [eq_comm, sqrt_eq_iff_eq_sq, cL2Norm_sq_indicator_one] <;> positivity
 
-@[simp] lemma cL1Norm_indicate (s : Finset ι) : ‖𝟭_[R] s‖ₙ_[1] = s.dens := by
-  simpa using cLpNorm_pow_indicate one_ne_zero s
+@[simp] lemma cL1Norm_indicator_one (s : Finset ι) : ‖𝟭_[(s : Set ι), R]‖ₙ_[1] = s.dens := by
+  simpa using cLpNorm_pow_indicator_one one_ne_zero s
 
 end Indicator
 

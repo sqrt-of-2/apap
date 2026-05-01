@@ -1,11 +1,10 @@
 module
 
 public import APAP.Prereqs.Convolution.Discrete.Defs
-public import APAP.Prereqs.Function.Indicator.Defs
 public import APAP.Prereqs.LpNorm.Weighted
+public import APAP.Prereqs.Mu
 public import Mathlib.Analysis.RCLike.Inner
 
-import APAP.Prereqs.Function.Indicator.Complex
 import Mathlib.Algebra.Order.Floor.Semifield
 import Mathlib.Analysis.Complex.ExponentialBounds
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
@@ -25,21 +24,21 @@ variable {G : Type*} [Fintype G] [DecidableEq G] [AddCommGroup G]
   {ν : G → ℝ≥0} {f : G → ℝ} {g h : G → ℂ} {ε : ℝ} {p : ℕ}
 
 /-- Note that we do the physical proof in order to avoid the Fourier transform. -/
-lemma pow_inner_nonneg' {f : G → ℂ} (hf : g ○ g = f) (hν : h ○ h = (↑) ∘ ν) (k : ℕ) :
+lemma pow_inner_nonneg' {f : G → ℂ} (hf : g ○ᵈ g = f) (hν : h ○ᵈ h = (↑) ∘ ν) (k : ℕ) :
     0 ≤ ⟪f ^ k, (↑) ∘ ν⟫_[ℂ] := by
   calc
     0 ≤ ∑ z : Fin k → G, (‖∑ x, (∏ i, conj (g (x + z i))) * h x‖ : ℂ) ^ 2 := by positivity
     _ = ∑ x : G, ∑ yz : G × G with yz.1 - yz.2 = x,
-          h yz.1 * conj h yz.2 * conj ((g ○ g) (yz.1 - yz.2)) ^ k := ?_
+          h yz.1 * conj h yz.2 * conj ((g ○ᵈ g) (yz.1 - yz.2)) ^ k := ?_
     _ = ∑ x : G, ∑ yz : G × G with yz.1 - yz.2 = x,
-          h yz.1 * conj h yz.2 * conj ((g ○ g) x) ^ k := by
+          h yz.1 * conj h yz.2 * conj ((g ○ᵈ g) x) ^ k := by
         congr! with x _ yz hyz
         simpa using hyz
     _ = _ := by
       rw [← hf, ← hν, wInner_one_eq_sum]
       simp only [Pi.pow_apply, RCLike.inner_apply, map_pow]
-      simp_rw [dconv_apply h, sum_mul]
-  simp_rw [dconv_apply_sub, sum_fiberwise, ← univ_product_univ, sum_product]
+      simp_rw [dddconv_apply h, sum_mul]
+  simp_rw [dddconv_apply_sub, sum_fiberwise, ← univ_product_univ, sum_product]
   simp only [sum_pow', sum_mul_sum, map_mul, starRingEnd_self_apply, Fintype.piFinset_univ,
     ← Complex.conj_mul', map_sum, map_prod]
   simp only [mul_sum, @sum_comm _ _ (Fin k → G), mul_comm (conj _), prod_mul_distrib, Pi.conj_apply]
@@ -51,7 +50,7 @@ lemma pow_inner_nonneg' {f : G → ℂ} (hf : g ○ g = f) (hν : h ○ h = (↑
 
 set_option backward.isDefEq.respectTransparency false in
 /-- Note that we do the physical proof in order to avoid the Fourier transform. -/
-lemma pow_inner_nonneg {f : G → ℝ} (hf : g ○ g = (↑) ∘ f) (hν : h ○ h = (↑) ∘ ν) (k : ℕ) :
+lemma pow_inner_nonneg {f : G → ℝ} (hf : g ○ᵈ g = (↑) ∘ f) (hν : h ○ᵈ h = (↑) ∘ ν) (k : ℕ) :
     (0 : ℝ) ≤ ⟪(↑) ∘ ν, f ^ k⟫_[ℝ] := by
   simpa [← Complex.zero_le_real, wInner_one_eq_sum, mul_comm] using pow_inner_nonneg' hf hν k
 
@@ -66,7 +65,7 @@ variable [MeasurableSpace G] [DiscreteMeasurableSpace G]
 set_option backward.isDefEq.respectTransparency false in
 /-- Note that we do the physical proof in order to avoid the Fourier transform. -/
 private lemma unbalancing'' (p : ℕ) (hp : 5 ≤ p) (hp₁ : Odd p) (hε₀ : 0 < ε) (hε₁ : ε ≤ 1)
-    (hf : g ○ g = (↑) ∘ f) (hν : h ○ h = (↑) ∘ ν) (hν₁ : ∑ x, ν x = 1)
+    (hf : g ○ᵈ g = (↑) ∘ f) (hν : h ○ᵈ h = (↑) ∘ ν) (hν₁ : ∑ x, ν x = 1)
     (hε : ε ≤ ‖f‖_[p, ν]) :
     1 + ε / 2 ≤ ‖f + 1‖_[.ofReal (24 / ε * log (3 / ε) * p), ν] := by
   have hνprob : ∑ x, (ν x : ℝ≥0∞) = 1 := mod_cast hν₁
@@ -204,7 +203,7 @@ private lemma unbalancing'' (p : ℕ) (hp : 5 ≤ p) (hp₁ : Odd p) (hε₀ : 0
 /-- The unbalancing step. Note that we do the physical proof in order to avoid the Fourier
 transform. -/
 lemma unbalancing' (p : ℕ) (hp : p ≠ 0) (ε : ℝ) (hε₀ : 0 < ε) (hε₁ : ε ≤ 1) (ν : G → ℝ≥0)
-    (f : G → ℝ) (g h : G → ℂ) (hf : g ○ g = (↑) ∘ f) (hν : h ○ h = (↑) ∘ ν)
+    (f : G → ℝ) (g h : G → ℂ) (hf : g ○ᵈ g = (↑) ∘ f) (hν : h ○ᵈ h = (↑) ∘ ν)
     (hν₁ : ∑ x, ν x = 1) (hε : ε ≤ ‖f‖_[p, ν]) :
     ∃ p' : ℕ, p' ≤ 2 ^ 10 * ε⁻¹ ^ 2 * p ∧ 1 + ε / 2 ≤ ‖f + 1‖_[p', ν] := by
   have := log_ε_pos hε₀ hε₁
@@ -247,7 +246,7 @@ lemma unbalancing' (p : ℕ) (hp : p ≠ 0) (ε : ℝ) (hε₀ : 0 < ε) (hε₁
 /-- The unbalancing step. Note that we do the physical proof in order to avoid the Fourier
 transform. -/
 lemma unbalancing (p : ℕ) (hp : p ≠ 0) (ε : ℝ) (hε₀ : 0 < ε) (hε₁ : ε ≤ 1) (f : G → ℝ) (g h : G → ℂ)
-    (hf : g ○ g = (↑) ∘ f) (hh : h ○ h = μ univ)
+    (hf : g ○ᵈ g = (↑) ∘ f) (hh : h ○ᵈ h = μ univ)
     (hε : ε ≤ ‖f‖_[p, μ univ]) :
     ∃ p' : ℕ, p' ≤ 2 ^ 10 * ε⁻¹ ^ 2 * p ∧ 1 + ε / 2 ≤ ‖f + 1‖_[p', μ univ] :=
   unbalancing' p hp ε hε₀ hε₁ _ _ g h hf

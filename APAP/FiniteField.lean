@@ -13,8 +13,6 @@ import APAP.Prereqs.Convolution.Norm
 import APAP.Prereqs.Convolution.Order
 import APAP.Prereqs.Convolution.ThreeAP
 import APAP.Prereqs.FourierTransform.Convolution
-import APAP.Prereqs.Function.Indicator.Basic
-import APAP.Prereqs.Function.Indicator.Complex
 import APAP.Prereqs.Inner.Function
 import APAP.Prereqs.Inner.Hoelder.Discrete
 import APAP.Prereqs.LpNorm.Discrete.Basic
@@ -34,7 +32,7 @@ attribute [-simp] Real.log_inv
 
 open Fintype Function Module RCLike Real
 open Finset hiding card
-open scoped ENNReal NNReal BigOperators Combinatorics.Additive Pointwise mu
+open scoped ENNReal NNReal BigOperators Combinatorics.Additive Pointwise Indicator mu
 
 universe u
 variable {G : Type u} [AddCommGroup G] [Fintype G] {A C : Finset G} {x y γ ε : ℝ}
@@ -107,8 +105,8 @@ private lemma curlog_pow_le {n : ℕ} (hx₀ : 0 < x) (hn : n ≠ 0) : 𝓛 (x ^
 set_option backward.isDefEq.respectTransparency false in
 lemma global_dichotomy [DecidableEq G] [MeasurableSpace G] [DiscreteMeasurableSpace G]
     (hA : A.Nonempty) (hγC : γ ≤ C.dens) (hγ : 0 < γ)
-    (hAC : ε ≤ |card G * ⟪μ_[ℝ] A ∗ μ A, μ C⟫_[ℝ] - 1|) :
-    ε / (2 * card G) ≤ ‖balance (μ_[ℝ] A) ○ balance (μ A)‖_[↑(2 * ⌈𝓛 γ⌉₊), μ univ] := by
+    (hAC : ε ≤ |card G * ⟪μ_[ℝ] A ∗ᵈ μ A, μ C⟫_[ℝ] - 1|) :
+    ε / (2 * card G) ≤ ‖balance (μ_[ℝ] A) ○ᵈ balance (μ A)‖_[↑(2 * ⌈𝓛 γ⌉₊), μ univ] := by
   have hC : C.Nonempty := by simpa using hγ.trans_le hγC
   have hγ₁ : γ ≤ 1 := hγC.trans (by norm_cast; exact dens_le_one)
   set p := 2 * ⌈𝓛 γ⌉₊
@@ -120,17 +118,17 @@ lemma global_dichotomy [DecidableEq G] [MeasurableSpace G] [DiscreteMeasurableSp
   rw [mul_comm, ← div_div, div_le_iff₀ (zero_lt_two' ℝ)]
   calc
     _ ≤ _ := div_le_div_of_nonneg_right hAC (card G).cast_nonneg
-    _ = |⟪balance (μ A) ∗ balance (μ A), μ C⟫_[ℝ]| := ?_
-    _ ≤ ‖balance (μ_[ℝ] A) ∗ balance (μ A)‖_[p] * ‖μ_[ℝ] C‖_[NNReal.conjExponent p] :=
+    _ = |⟪balance (μ A) ∗ᵈ balance (μ A), μ C⟫_[ℝ]| := ?_
+    _ ≤ ‖balance (μ_[ℝ] A) ∗ᵈ balance (μ A)‖_[p] * ‖μ_[ℝ] C‖_[NNReal.conjExponent p] :=
         MeasureTheory.abs_wInner_one_le_dLpNorm_mul_dLpNorm _ _
-    _ ≤ ‖balance (μ_[ℝ] A) ○ balance (μ A)‖_[p] * (card G ^ (-(p : ℝ)⁻¹) * γ ^ (-(p : ℝ)⁻¹)) :=
-        mul_le_mul (dLpNorm_conv_le_dLpNorm_dconv' (by positivity) (even_two_mul _) _) ?_
+    _ ≤ ‖balance (μ_[ℝ] A) ○ᵈ balance (μ A)‖_[p] * (card G ^ (-(p : ℝ)⁻¹) * γ ^ (-(p : ℝ)⁻¹)) :=
+        mul_le_mul (dLpNorm_ddconv_le_dLpNorm_dddconv' (by positivity) (even_two_mul _) _) ?_
           (by positivity) (by positivity)
-    _ = ‖balance (μ_[ℝ] A) ○ balance (μ A)‖_[↑(2 * ⌈𝓛 γ⌉₊), μ univ] * γ ^ (-(p : ℝ)⁻¹) := ?_
+    _ = ‖balance (μ_[ℝ] A) ○ᵈ balance (μ A)‖_[↑(2 * ⌈𝓛 γ⌉₊), μ univ] * γ ^ (-(p : ℝ)⁻¹) := ?_
     _ ≤ _ := mul_le_mul_of_nonneg_left ?_ <| by positivity
-  · rw [← balance_conv, balance, wInner_sub_left, wInner_one_const_left, expect_conv, sum_mu ℝ hA,
-      expect_mu ℝ hA, sum_mu ℝ hC, conj_trivial, one_mul, one_mul, ← mul_inv_cancel₀, ← mul_sub,
-      abs_mul, abs_of_nonneg, mul_div_cancel_left₀] <;> positivity
+  · rw [← balance_ddconv, balance, wInner_sub_left, wInner_one_const_left, expect_ddconv,
+      sum_mu ℝ hA, expect_mu ℝ hA, sum_mu ℝ hC, conj_trivial, one_mul, one_mul, ← mul_inv_cancel₀,
+      ← mul_sub, abs_mul, abs_of_nonneg, mul_div_cancel_left₀] <;> positivity
   · rw [MeasureTheory.dLpNorm_mu hp''.symm.lt.le hC, hp''.symm.coe.inv_sub_one, NNReal.coe_natCast,
       ← mul_rpow]
     any_goals positivity
@@ -164,7 +162,7 @@ lemma ap_in_ff [DecidableEq G] (hq₃ : 3 ≤ q) (hq : q.Prime) (hα₀ : 0 < α
     (hε₀ : 0 < ε) (hε₁ : ε ≤ 1) (hαA₁ : α ≤ A₁.dens) (hαA₂ : α ≤ A₂.dens) :
     ∃ (V : Submodule (ZMod q) G) (_ : DecidablePred (· ∈ V)),
         ↑(finrank (ZMod q) G - finrank (ZMod q) V) ≤ 2 ^ 32 * 𝓛 α ^ 2 * 𝓛 (ε * α) ^ 2 * ε⁻¹ ^ 2 ∧
-          |∑ x ∈ S, (μ (Set.toFinset V) ∗ μ A₁ ∗ μ A₂) x - ∑ x ∈ S, (μ A₁ ∗ μ A₂) x| ≤ ε := by
+          |∑ x ∈ S, (μ (Set.toFinset V) ∗ᵈ μ A₁ ∗ᵈ μ A₂) x - ∑ x ∈ S, (μ A₁ ∗ᵈ μ A₂) x| ≤ ε := by
   classical
   let _ : MeasurableSpace G := ⊤
   have : Fact (1 < q) := ⟨hq.one_lt⟩
@@ -249,19 +247,20 @@ lemma ap_in_ff [DecidableEq G] (hq₃ : 3 ≤ q) (hq : q.Prime) (hα₀ : 0 < α
         gcongr
         sorry
       _ = 2 ^ 32 * 𝓛 α ^ 2 * 𝓛 (ε * α) ^ 2 * ε⁻¹ ^ 2 := by ring
-  · have : ∑ x ∈ S, (μ_[ℝ] V' ∗ μ A₁ ∗ μ A₂) x = 𝔼 x ∈ V', (μ A₁ ∗ μ A₂ ○ 𝟭 S) x := by
+  · have : ∑ x ∈ S, (μ_[ℝ] V' ∗ᵈ μ A₁ ∗ᵈ μ A₂) x = 𝔼 x ∈ V', (μ A₁ ∗ᵈ μ A₂ ○ᵈ 𝟭_[S]) x := by
       have : -V' = V' := by ext; simp [V']
-      rw [← mu_wInner_one, ← indicate_wInner_one, conv_rotate,
-        ← dconv_wInner_one_eq_wInner_one_conv, wInner_one_dconv_eq_conv_wInner_one, ← conv_conjneg,
-        conjneg_mu, this, conv_comm]
-    have : ∑ x ∈ S, (μ_[ℝ] A₁ ∗ μ A₂) x = (μ_[ℝ] A₁ ∗ μ A₂ ○ 𝟭 S) 0 := by simp [dconv_indicate]
+      rw [← mu_wInner_one, ← indicator_one_wInner_one, ddconv_rotate,
+        ← dddconv_wInner_one_eq_wInner_one_ddconv, wInner_one_dddconv_eq_ddconv_wInner_one,
+        ← ddconv_conjneg, conjneg_mu, this, ddconv_comm]
+    have : ∑ x ∈ S, (μ_[ℝ] A₁ ∗ᵈ μ A₂) x = (μ_[ℝ] A₁ ∗ᵈ μ A₂ ○ᵈ 𝟭_[S]) 0 := by
+      simp [dddconv_indicator_one]
     sorry
 
 lemma ap_in_ff' [DecidableEq G] (hq₃ : 3 ≤ q) (hq : q.Prime) (hα₀ : 0 < α) (hα₂ : α ≤ 2⁻¹)
     (hε₀ : 0 < ε) (hε₁ : ε ≤ 1) (hαA₁ : α ≤ A₁.dens) (hαA₂ : α ≤ A₂.dens) :
     ∃ (V : Submodule (ZMod q) G) (_ : DecidablePred (· ∈ V)),
         ↑(finrank (ZMod q) G - finrank (ZMod q) V) ≤ 2 ^ 32 * 𝓛 α ^ 2 * 𝓛 (ε * α) ^ 2 * ε⁻¹ ^ 2 ∧
-          |∑ x ∈ S, (μ (Set.toFinset V) ∗ μ A₁ ○ μ A₂) x - ∑ x ∈ S, (μ A₁ ○ μ A₂) x| ≤ ε := by
+          |∑ x ∈ S, (μ (Set.toFinset V) ∗ᵈ μ A₁ ○ᵈ μ A₂) x - ∑ x ∈ S, (μ A₁ ○ᵈ μ A₂) x| ≤ ε := by
   simpa [← conjneg_mu] using ap_in_ff S hq₃ hq (A₂ := -A₂) hα₀ hα₂ hε₀ hε₁ hαA₁ (by simpa)
 
 set_option backward.isDefEq.respectTransparency false in
@@ -270,11 +269,11 @@ set_option maxHeartbeats 400000 in
 -- FIXME: Get rid of raised heartbeats
 lemma di_in_ff [DecidableEq G] [MeasurableSpace G] [DiscreteMeasurableSpace G] (hq₃ : 3 ≤ q)
     (hq : q.Prime) (hε₀ : 0 < ε) (hε₁ : ε < 1) (hγC : γ ≤ C.dens) (hγ : 0 < γ)
-    (hAC : ε ≤ |card G * ⟪μ_[ℝ] A ∗ μ A, μ C⟫_[ℝ] - 1|) :
+    (hAC : ε ≤ |card G * ⟪μ_[ℝ] A ∗ᵈ μ A, μ C⟫_[ℝ] - 1|) :
     ∃ (V : Submodule (ZMod q) G) (_ : DecidablePred (· ∈ V)),
         ↑(finrank (ZMod q) G - finrank (ZMod q) V) ≤
             2 ^ 132 * 𝓛 A.dens ^ 4 * 𝓛 γ ^ 4 / ε ^ 16 ∧
-          (1 + ε / 32) * A.dens ≤ ‖𝟭_[ℝ] A ∗ μ (Set.toFinset V)‖_[∞] := by
+          (1 + ε / 32) * A.dens ≤ ‖𝟭_[(A : Set G), ℝ] ∗ᵈ μ (Set.toFinset V)‖_[∞] := by
   have hγ₁ : γ ≤ 1 := hγC.trans (by norm_cast; exact dens_le_one)
   let α : ℝ := A.dens
   let p : ℕ := 2 * ⌈𝓛 γ⌉₊
@@ -283,12 +282,12 @@ lemma di_in_ff [DecidableEq G] [MeasurableSpace G] [DiscreteMeasurableSpace G] (
   · exact ⟨⊤, Classical.decPred _, by simp; positivity⟩
   obtain ⟨p', hp', unbalancing⟩ :
     ∃ p' : ℕ, p' ≤ 2 ^ 10 * (ε / 2)⁻¹ ^ 2 * p ∧
-      1 + ε / 2 / 2 ≤ ‖card G • (f ○ f) + 1‖_[p', μ univ] := by
+      1 + ε / 2 / 2 ≤ ‖card G • (f ○ᵈ f) + 1‖_[p', μ univ] := by
     refine unbalancing _ (mul_ne_zero two_ne_zero (Nat.ceil_pos.2 <| curlog_pos hγ.le hγ₁).ne')
       (ε / 2) (by positivity) (div_le_one_of_le₀ (hε₁.le.trans <| by norm_num) <| by norm_num)
-      (card G • (balance (μ A) ○ balance (μ A))) (sqrt (card G) • balance (μ A)) (μ univ) ?_ ?_ ?_
+      (card G • (balance (μ A) ○ᵈ balance (μ A))) (sqrt (card G) • balance (μ A)) (μ univ) ?_ ?_ ?_
     · ext a : 1
-      simp [smul_dconv, dconv_smul, ← mul_assoc, ← sq, ← Complex.ofReal_pow]
+      simp [smul_dddconv, dddconv_smul, ← mul_assoc, ← sq, ← Complex.ofReal_pow]
     · simp
     · have global_dichotomy := global_dichotomy hA₀ hγC hγ hAC
       simpa [wLpNorm_nsmul, ← nsmul_eq_mul, div_le_iff₀' (show (0 : ℝ) < card G by positivity),
@@ -326,7 +325,7 @@ lemma di_in_ff [DecidableEq G] [MeasurableSpace G] [DiscreteMeasurableSpace G] (
         exact one_le_pow₀ ((one_le_inv₀ hε₀).2 hε₁.le)
       _ = 2 ^ 17 * 𝓛 γ / ε ^ 3 := by ring
   obtain ⟨A₁, A₂, hA, hA₁, hA₂⟩ : ∃ (A₁ A₂ : Finset G),
-      1 - ε / 32 ≤ ∑ x ∈ s q' (ε / 16) univ univ A, (μ A₁ ○ μ A₂) x ∧
+      1 - ε / 32 ≤ ∑ x ∈ s q' (ε / 16) univ univ A, (μ A₁ ○ᵈ μ A₂) x ∧
         (4⁻¹ : ℝ) * A.dens ^ (2 * q') ≤ A₁.dens ∧ (4⁻¹ : ℝ) * A.dens ^ (2 * q') ≤ A₂.dens := by
     refine sifting_cor (ε := ε / 16) (δ := ε / 32) (by positivity) (by linarith)
       (by positivity) (p := q') (even_two_mul _)
@@ -354,36 +353,36 @@ lemma di_in_ff [DecidableEq G] [MeasurableSpace G] [DiscreteMeasurableSpace G] (
         gcongr
         · norm_num
         · positivity
-  have : card G • (f ○ f) + 1 = card G • (μ A ○ μ A) := by
+  have : card G • (f ○ᵈ f) + 1 = card G • (μ A ○ᵈ μ A) := by
     unfold f
-    rw [← balance_dconv, balance, smul_sub, smul_const, Fintype.card_smul_expect]
-    simp [sum_dconv, hA₀]
+    rw [← balance_dddconv, balance, smul_sub, smul_const, Fintype.card_smul_expect]
+    simp [sum_dddconv, hA₀]
   have :=
     calc
       1 + ε / 4 = 1 + ε / 2 / 2 := by ring
-      _ ≤ ‖card G • (f ○ f) + 1‖_[p', μ univ] := unbalancing
-      _ = card G • ‖(μ_[ℝ] A ○ μ A)‖_[p', μ univ] := by simp [this, wLpNorm_nsmul, -nsmul_eq_mul]
-      _ ≤ card G • ‖(μ_[ℝ] A ○ μ A)‖_[q', μ univ] := by
-        have : Nonempty G := ⟨hA₀.choose⟩
+      _ ≤ ‖card G • (f ○ᵈ f) + 1‖_[p', μ univ] := unbalancing
+      _ = card G • ‖(μ_[ℝ] A ○ᵈ μ A)‖_[p', μ univ] := by simp [this, wLpNorm_nsmul, -nsmul_eq_mul]
+      _ ≤ card G • ‖(μ_[ℝ] A ○ᵈ μ A)‖_[q', μ univ] := by
+        have : Nonempty G := hA₀.to_type
         gcongr
-        exact wLpNorm_mono_right
-          (mod_cast sum_mu (R := ℝ≥0) univ_nonempty) (mod_cast hp'q') _
-  let s' : Finset G := {x | 1 + ε / 8 ≤ card G • (μ A ○ μ A) x}
+        exact mod_cast sum_mu ℝ≥0 univ_nonempty
+  let s' : Finset G := {x | 1 + ε / 8 ≤ card G • (μ A ○ᵈ μ A) x}
   have hss' : s q' (ε / 16) univ univ A ⊆ s' := by
-    simp only [subset_iff, mem_s', ENNReal.coe_natCast, mu_univ_dconv_mu_univ,
+    simp only [subset_iff, mem_s', ENNReal.coe_natCast, mu_univ_dddconv_mu_univ,
       mem_filter, mem_univ, true_and, s']
     rintro x hx
     calc
       1 + ε / 8 ≤ (1 - ε / 16) * (1 + ε / 4) := one_add_le_one_sub_mul_one_add <| calc
           ε / 8 + ε / 16 + ε / 16 * (ε / 4) ≤ ε / 8 + ε / 16 + ε / 16 * (1 / 4) := by gcongr
           _ ≤ ε / 4 := by linarith
-      _ ≤ (1 - ε / 16) * card G • ‖μ_[ℝ] A ○ μ A‖_[q', μ univ] := by gcongr; linarith
-      _ = card G • ((1 - ε / 16) * ‖μ_[ℝ] A ○ μ A‖_[q', μ univ]) := mul_smul_comm ..
-      _ ≤ card G • (μ A ○ μ A) x := by gcongr
+      _ ≤ (1 - ε / 16) * card G • ‖μ_[ℝ] A ○ᵈ μ A‖_[q', μ univ] := by gcongr; linarith
+      _ = card G • ((1 - ε / 16) * ‖μ_[ℝ] A ○ᵈ μ A‖_[q', μ univ]) := mul_smul_comm ..
+      _ ≤ card G • (μ A ○ᵈ μ A) x := by gcongr
   obtain ⟨V, _, hVdim, hV⟩ : ∃ (V : Submodule (ZMod q) G) (_ : DecidablePred (· ∈ V)),
     ↑(finrank (ZMod q) G - finrank (ZMod q) V) ≤
         2 ^ 32 * 𝓛 (4⁻¹ * α ^ (2 * q')) ^ 2 * 𝓛 (ε / 32 * (4⁻¹ * α ^ (2 * q'))) ^ 2 * (ε / 32)⁻¹ ^ 2
-          ∧ |∑ x ∈ s', (μ (Set.toFinset V) ∗ μ A₁ ○ μ A₂) x - ∑ x ∈ s', (μ A₁ ○ μ A₂) x| ≤ ε / 32 :=
+          ∧ |∑ x ∈ s', (μ (Set.toFinset V) ∗ᵈ μ A₁ ○ᵈ μ A₂) x -
+            ∑ x ∈ s', (μ A₁ ○ᵈ μ A₂) x| ≤ ε / 32 :=
     ap_in_ff' _ hq₃ hq (by positivity)
     (calc
       4⁻¹ * (A.dens : ℝ) ^ (2 * q') ≤ 4⁻¹ * 1 := by
@@ -392,15 +391,15 @@ lemma di_in_ff [DecidableEq G] [MeasurableSpace G] [DiscreteMeasurableSpace G] (
   replace hV :=
     calc
       1 - ε / 16 = 1 - ε / 32 - ε / 32 := by ring
-      _ ≤ ∑ x ∈ s q' (ε / 16) univ univ A, (μ A₁ ○ μ A₂) x -
-        |∑ x ∈ s', (μ (Set.toFinset V) ∗ μ A₁ ○ μ A₂) x - ∑ x ∈ s', (μ A₁ ○ μ A₂) x| := by gcongr
-      _ ≤ ∑ x ∈ s', (μ A₁ ○ μ A₂) x -
-        -(∑ x ∈ s', (μ (Set.toFinset V) ∗ μ A₁ ○ μ A₂) x - ∑ x ∈ s', (μ A₁ ○ μ A₂) x) := by
+      _ ≤ ∑ x ∈ s q' (ε / 16) univ univ A, (μ A₁ ○ᵈ μ A₂) x -
+        |∑ x ∈ s', (μ (Set.toFinset V) ∗ᵈ μ A₁ ○ᵈ μ A₂) x - ∑ x ∈ s', (μ A₁ ○ᵈ μ A₂) x| := by gcongr
+      _ ≤ ∑ x ∈ s', (μ A₁ ○ᵈ μ A₂) x -
+        -(∑ x ∈ s', (μ (Set.toFinset V) ∗ᵈ μ A₁ ○ᵈ μ A₂) x - ∑ x ∈ s', (μ A₁ ○ᵈ μ A₂) x) := by
         gcongr
-        · have : 0 ≤ μ_[ℝ] A₁ ○ μ A₂ := dconv_nonneg mu_nonneg mu_nonneg
+        · have : 0 ≤ μ_[ℝ] A₁ ○ᵈ μ A₂ := dddconv_nonneg mu_nonneg mu_nonneg
           exact fun _ _ _ ↦ this _
         · exact neg_le_abs _
-      _ = ∑ x ∈ s', (μ (Set.toFinset V) ∗ μ A₁ ○ μ A₂) x := by ring
+      _ = ∑ x ∈ s', (μ (Set.toFinset V) ∗ᵈ μ A₁ ○ᵈ μ A₂) x := by ring
   refine ⟨V, inferInstance, ?_, ?_⟩
   · calc
       ↑(finrank (ZMod q) G - finrank (ZMod q) V)
@@ -430,47 +429,47 @@ lemma di_in_ff [DecidableEq G] [MeasurableSpace G] [DiscreteMeasurableSpace G] (
       _ ≤ 2 ^ 64 * (2 ^ 17 * 𝓛 γ / ε ^ 3) ^ 4 * 𝓛 α ^ 4 / ε ^ 4 := by gcongr
       _ = 2 ^ 132 * 𝓛 α ^ 4 * 𝓛 γ ^ 4 / ε ^ 16 := by ring
   · rw [← le_div_iff₀ (by positivity)]
-    have : 0 ≤ μ_[ℝ] (Set.toFinset V) ∗ μ A₁ ○ μ A₂ :=
-      dconv_nonneg (conv_nonneg mu_nonneg mu_nonneg) mu_nonneg
+    have : 0 ≤ μ_[ℝ] (Set.toFinset V) ∗ᵈ μ A₁ ○ᵈ μ A₂ :=
+      dddconv_nonneg (ddconv_nonneg mu_nonneg mu_nonneg) mu_nonneg
     calc
       1 + ε / 32 ≤ (1 + ε / 8) * (1 - ε / 16) := one_add_le_one_add_mul_one_sub <|
         calc
           ε / 32 + ε / 16 + ε / 8 * (ε / 16) ≤ ε / 32 + ε / 16 + ε / 8 * (1 / 16) := by gcongr
           _ ≤ ε / 8 := by linarith
-      _ ≤ (1 + ε / 8) * ∑ x ∈ s', (μ (Set.toFinset V) ∗ μ A₁ ○ μ A₂) x := by gcongr
-      _ = ∑ x ∈ s', (1 + ε / 8) * (μ (Set.toFinset V) ∗ μ A₁ ○ μ A₂) x := mul_sum ..
-      _ ≤ ∑ x ∈ s', card G • (μ A ○ μ A) x * (μ (Set.toFinset V) ∗ μ A₁ ○ μ A₂) x := by
+      _ ≤ (1 + ε / 8) * ∑ x ∈ s', (μ (Set.toFinset V) ∗ᵈ μ A₁ ○ᵈ μ A₂) x := by gcongr
+      _ = ∑ x ∈ s', (1 + ε / 8) * (μ (Set.toFinset V) ∗ᵈ μ A₁ ○ᵈ μ A₂) x := mul_sum ..
+      _ ≤ ∑ x ∈ s', card G • (μ A ○ᵈ μ A) x * (μ (Set.toFinset V) ∗ᵈ μ A₁ ○ᵈ μ A₂) x := by
         gcongr with x hx
         · exact this _
         · exact (mem_filter.1 hx).2
-      _ ≤ ∑ x, card G • (μ A ○ μ A) x * (μ (Set.toFinset V) ∗ μ A₁ ○ μ A₂) x := by
+      _ ≤ ∑ x, card G • (μ A ○ᵈ μ A) x * (μ (Set.toFinset V) ∗ᵈ μ A₁ ○ᵈ μ A₂) x := by
         gcongr
         · rintro x - -
           have : (0 : ℝ) ≤ _ := this x
-          have : 0 ≤ μ_[ℝ] A ○ μ A := dconv_nonneg mu_nonneg mu_nonneg
+          have : 0 ≤ μ_[ℝ] A ○ᵈ μ A := dddconv_nonneg mu_nonneg mu_nonneg
           have : (0 : ℝ) ≤ _ := this x
           positivity
         · exact subset_univ _
-      _ = card G • ⟪μ_[ℝ] (Set.toFinset V) ∗ μ A, μ A ∗ μ A₂ ○ μ A₁⟫_[ℝ] := by
-        rw [← wInner_one_dconv_eq_conv_wInner_one, dconv_right_comm, conv_dconv_right_comm (μ A),
-          wInner_one_dconv_eq_conv_wInner_one, ← dconv_wInner_one_eq_wInner_one_conv,
-          ← conj_wInner_symm]
+      _ = card G • ⟪μ_[ℝ] (Set.toFinset V) ∗ᵈ μ A, μ A ∗ᵈ μ A₂ ○ᵈ μ A₁⟫_[ℝ] := by
+        rw [← wInner_one_dddconv_eq_ddconv_wInner_one, dddconv_right_comm,
+          ddconv_dddconv_right_comm (μ A), wInner_one_dddconv_eq_ddconv_wInner_one,
+          ← dddconv_wInner_one_eq_wInner_one_ddconv, ← conj_wInner_symm]
         simp [wInner_one_eq_sum, smul_sum, mul_assoc]
         congr! 1
         group
-      _ ≤ card G • (‖μ_[ℝ] (Set.toFinset V) ∗ μ A‖_[∞] * ‖μ_[ℝ] A ∗ μ A₂ ○ μ A₁‖_[1]) := by
+      _ ≤ card G • (‖μ_[ℝ] (Set.toFinset V) ∗ᵈ μ A‖_[∞] * ‖μ_[ℝ] A ∗ᵈ μ A₂ ○ᵈ μ A₁‖_[1]) := by
         gcongr; exact MeasureTheory.wInner_one_le_dLpNorm_mul_dLpNorm _ _
       _ = _ := by
         have : 0 < (4 : ℝ)⁻¹ * A.dens ^ (2 * q') := by positivity
         replace hA₁ : A₁.Nonempty := by simpa using this.trans_le hA₁
         replace hA₂ : A₂.Nonempty := by simpa using this.trans_le hA₂
-        rw [dL1Norm_dconv, dL1Norm_conv]
-        · simp [eq_div_iff, hA₀.dens_ne_zero, hA₀, hA₁, hA₂, ← card_smul_mu, smul_conv,
+        rw [dL1Norm_dddconv, dL1Norm_ddconv]
+        · simp [eq_div_iff, hA₀.dens_ne_zero, hA₀, hA₁, hA₂, ← card_smul_mu, smul_ddconv,
             MeasureTheory.dLpNorm_nsmul, -nsmul_eq_mul]
-          simp [← mul_assoc, mul_comm, conv_comm]
+          simp [← mul_assoc, mul_comm, ddconv_comm]
         · exact mu_nonneg
         · exact mu_nonneg
-        · exact conv_nonneg mu_nonneg mu_nonneg
+        · exact ddconv_nonneg mu_nonneg mu_nonneg
         · exact mu_nonneg
 
 set_option linter.flexible false in
@@ -512,7 +511,7 @@ public theorem ff (hq₃ : 3 ≤ q) (hq : q.Prime) (hA₀ : A.Nonempty) (hA : Th
       (B : Finset V), n ≤ finrank (ZMod q) V + 2 ^ 148 * i * 𝓛 α ^ 8 ∧ ThreeAPFree (B : Set V)
         ∧ α ≤ B.dens ∧
       (B.dens < (65 / 64 : ℝ) ^ i * α →
-        2⁻¹ ≤ card V * ⟪μ_[ℝ] B ∗ μ B, μ (B.image (2 • ·))⟫_[ℝ]) := by
+        2⁻¹ ≤ card V * ⟪μ_[ℝ] B ∗ᵈ μ B, μ (B.image (2 • ·))⟫_[ℝ]) := by
     induction i with
     | zero =>
       classical
@@ -520,13 +519,13 @@ public theorem ff (hq₃ : 3 ≤ q) (hq : q.Prime) (hA₀ : A.Nonempty) (hA : Th
         by simp [α], by simp [α, nnratCast_dens]⟩
     | succ i ih =>
     obtain ⟨V, _, _, _, _, B, hV, hB, hαβ, hBV⟩ := ih
-    obtain hB' | hB' := le_or_gt 2⁻¹ (card V * ⟪μ_[ℝ] B ∗ μ B, μ (B.image (2 • ·))⟫_[ℝ])
+    obtain hB' | hB' := le_or_gt 2⁻¹ (card V * ⟪μ_[ℝ] B ∗ᵈ μ B, μ (B.image (2 • ·))⟫_[ℝ])
     · exact ⟨V, inferInstance, inferInstance, inferInstance, inferInstance, B,
         hV.trans (by gcongr; exact i.le_succ), hB, hαβ, fun _ ↦ hB'⟩
     let _ : MeasurableSpace V := ⊤
     have : DiscreteMeasurableSpace V := ⟨fun _ ↦ trivial⟩
     have : 0 < 𝓛 B.dens := curlog_pos (by positivity) (by simp)
-    have : 2⁻¹ ≤ |card V * ⟪μ_[ℝ] B ∗ μ B, μ (B.image (2 • ·))⟫_[ℝ] - 1| := by
+    have : 2⁻¹ ≤ |card V * ⟪μ_[ℝ] B ∗ᵈ μ B, μ (B.image (2 • ·))⟫_[ℝ] - 1| := by
       rw [abs_sub_comm, le_abs, le_sub_comm]
       norm_num at hB' ⊢
       exact .inl hB'.le
@@ -540,9 +539,9 @@ public theorem ff (hq₃ : 3 ≤ q) (hq : q.Prime) (hA₀ : A.Nonempty) (hA : Th
     have hβ := by
       calc
         ((1 + 64⁻¹ : ℝ) * B.dens : ℝ) = (1 + 2⁻¹ / 32) * B.dens := by ring
-        _ ≤ ‖(𝟭_[ℝ] B ∗ μ (V' : Set V).toFinset) x‖ := hx
+        _ ≤ ‖(𝟭_[(B : Set V), ℝ] ∗ᵈ μ (V' : Set V).toFinset) x‖ := hx
         _ = B'.dens := ?_
-      rw [mu, conv_smul, Pi.smul_apply, indicate_conv_indicate_eq_card_vadd_inter_neg,
+      rw [mu, ddconv_smul, Pi.smul_apply, indicator_one_ddconv_indicator_one_eq_card_vadd_inter_neg,
         Real.norm_of_nonneg (by positivity), nnratCast_dens, card_preimage, smul_eq_mul,
         inv_mul_eq_div]
       congr 2
@@ -591,7 +590,7 @@ public theorem ff (hq₃ : 3 ≤ q) (hq : q.Prime) (hA₀ : A.Nonempty) (hA : Th
         calc
           log (65 / 64) ≤ 65/64 - 1 := log_le_sub_one_of_pos <| by norm_num
           _ ≤ 1 := by norm_num
-  rw [hB.wInner_one_mu_conv_mu_mu_two_smul_mu] at hBV
+  rw [hB.wInner_one_mu_ddconv_mu_mu_two_smul_mu] at hBV
   swap
   · simpa [Module.card_eq_pow_finrank (K := ZMod q) (V := V), ZMod.card] using hq'.pow
   suffices h : (q ^ (n - 2 ^ 155 * 𝓛 α ^ 9) : ℝ) ≤ q ^ (n / 2) by

@@ -1,13 +1,21 @@
 module
 
-public import APAP.Extras.BSG
 public import APAP.FiniteField
 public import APAP.Integer
+public import APAP.Mathlib.Algebra.BigOperators.Expect
+public import APAP.Mathlib.Algebra.BigOperators.Pi
+public import APAP.Mathlib.Algebra.Group.Action.Pointwise.Set.Basic
+public import APAP.Mathlib.Algebra.Group.Pointwise.Set.Basic
+public import APAP.Mathlib.Algebra.Group.Translate
+public import APAP.Mathlib.Algebra.Star.Conjneg
+public import APAP.Mathlib.Algebra.Star.SelfAdjoint
 public import APAP.Mathlib.Analysis.Complex.Circle
 public import APAP.Mathlib.Analysis.Convolution
 public import APAP.Mathlib.Analysis.Normed.Ring.Basic
 public import APAP.Mathlib.Analysis.RCLike.Basic
 public import APAP.Mathlib.Analysis.SpecialFunctions.Complex.Circle
+public import APAP.Mathlib.Data.Complex.Basic
+public import APAP.Mathlib.Data.NNReal.Defs
 public import APAP.Mathlib.MeasureTheory.Function.LpSeminorm.CompareExp
 public import APAP.Mathlib.Topology.Algebra.PontryaginDual
 public import APAP.Physics.AlmostPeriodicity
@@ -28,9 +36,6 @@ public import APAP.Prereqs.Energy
 public import APAP.Prereqs.FourierTransform.Compact
 public import APAP.Prereqs.FourierTransform.Convolution
 public import APAP.Prereqs.FourierTransform.Discrete
-public import APAP.Prereqs.Function.Indicator.Basic
-public import APAP.Prereqs.Function.Indicator.Complex
-public import APAP.Prereqs.Function.Indicator.Defs
 public import APAP.Prereqs.Inner.Function
 public import APAP.Prereqs.Inner.Hoelder.Compact
 public import APAP.Prereqs.Inner.Hoelder.Discrete
@@ -40,5 +45,6 @@ public import APAP.Prereqs.LpNorm.Discrete.Basic
 public import APAP.Prereqs.LpNorm.Discrete.Defs
 public import APAP.Prereqs.LpNorm.Weighted
 public import APAP.Prereqs.MarcinkiewiczZygmund
+public import APAP.Prereqs.Mu
 public import APAP.Prereqs.NewMarcinkiewiczZygmund
 public import APAP.Prereqs.Rudin

@@ -4,6 +4,7 @@ public import APAP.Prereqs.Energy
 public import APAP.Prereqs.LargeSpec
 public import Mathlib.Combinatorics.Additive.Dissociation
 
+import AddCombi.Mathlib.Algebra.GroupWithZero.Indicator
 import APAP.Prereqs.Rudin
 import Mathlib.Algebra.Order.Chebyshev
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
@@ -17,7 +18,7 @@ import Mathlib.Tactic.Ring.Common
 @[expose] public section
 
 open Finset Fintype Function MeasureTheory RCLike Real
-open scoped ComplexConjugate ComplexOrder NNReal
+open scoped ComplexConjugate ComplexOrder NNReal Indicator
 
 variable {G : Type*} [AddCommGroup G] {f : G → ℂ} {x η : ℝ} {ψ : AddChar G ℂ}
   {Δ : Finset (AddChar G ℂ)} {m : ℕ}
@@ -68,15 +69,15 @@ lemma AddDissociated.boringEnergy_le [MeasurableSpace G] [DiscreteMeasurableSpac
   obtain rfl | hn := eq_or_ne n 0
   · simp
   calc
-    _ = (‖dft (𝟭 s)‖ₙ_[↑(2 * n)] ^ (2 * n) : ℝ) := by rw [cLpNorm_dft_indicate_pow]
-    _ ≤ (4 * rexp 2⁻¹ * sqrt ↑(2 * n) * ‖dft (𝟭 s)‖ₙ_[2]) ^ (2 * n) := by
+    _ = (‖dft 𝟭_[(s : Set G)]‖ₙ_[↑(2 * n)] ^ (2 * n) : ℝ) := by rw [cLpNorm_dft_indicator_one_pow]
+    _ ≤ (4 * rexp 2⁻¹ * sqrt ↑(2 * n) * ‖dft 𝟭_[(s : Set G)]‖ₙ_[2]) ^ (2 * n) := by
         gcongr
         refine rudin_ineq (le_mul_of_one_le_right zero_le_two <| Nat.one_le_iff_ne_zero.2 hn)
-          (dft (𝟭_[ℂ] s)) ?_
-        rwa [cft_dft, support_comp_eq_preimage, support_indicate, Set.preimage_comp,
+          (dft 𝟭_[(s : Set G), ℂ]) ?_
+        rwa [cft_dft, support_comp_eq_preimage, Set.support_indicator_one, Set.preimage_comp,
           Set.neg_preimage, addDissociated_neg, AddEquiv.addDissociated_preimage]
     _ = _ := by
-        simp_rw [mul_pow, pow_mul, cL2Norm_dft_indicate]
+        simp_rw [mul_pow, pow_mul, cL2Norm_dft_indicator_one]
         rw [← exp_nsmul, sq_sqrt (by positivity), sq_sqrt (by positivity)]
         simp_rw [← mul_pow]
         simp [changConst]

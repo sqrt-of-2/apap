@@ -44,6 +44,9 @@ set_option backward.isDefEq.respectTransparency false in
   congr!
   simp
 
+@[simp] lemma wLpNorm_fun_one_eq_dLpNorm (p : ℝ≥0∞) (f : α → E) : ‖f‖_[p, fun _ ↦ 1] = ‖f‖_[p] :=
+  wLpNorm_one_eq_dLpNorm ..
+
 @[simp] lemma wLpNorm_exponent_zero (w : α → ℝ≥0) (f : α → E) : ‖f‖_[0, w] = 0 := by simp [wLpNorm]
 
 @[simp]
@@ -104,6 +107,7 @@ lemma wL1Norm_eq_sum_norm (w : α → ℝ≥0) (f : α → E) : ‖f‖_[1, w] =
   simp [wLpNorm_eq_sum_norm]
 
 /-- Monotonicity of weighted `L^p` norms in the exponent, for probability weights. -/
+@[gcongr]
 lemma wLpNorm_mono_right
     (hw : ∑ i, (w i : ℝ≥0∞) = 1) (hpq : p ≤ q) (f : α → E) :
     ‖f‖_[p, w] ≤ ‖f‖_[q, w] := by
