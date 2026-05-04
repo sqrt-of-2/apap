@@ -147,10 +147,7 @@ lemma global_dichotomy [DecidableEq G] [MeasurableSpace G] [DiscreteMeasurableSp
         unfold p
         push_cast
         rw [mul_inv_rev, rpow_mul, sqrt_eq_rpow, one_div, inv_rpow] <;> positivity
-      _ ≤ √(γ⁻¹ ^ ((1 + log γ⁻¹)⁻¹ : ℝ)) := by
-        gcongr
-        · assumption
-        · exact Nat.le_ceil _
+      _ ≤ √(γ⁻¹ ^ ((1 + log γ⁻¹)⁻¹ : ℝ)) := by grw [← Nat.le_ceil]
       _ ≤ √ (exp 1) := by gcongr; exact rpow_inv_neg_curlog_le hγ.le hγ₁
       _ ≤ √ 2.7182818286 := by gcongr; exact exp_one_lt_d9.le
       _ ≤ 2 := by rw [sqrt_le_iff]; norm_num
@@ -311,7 +308,6 @@ lemma di_in_ff [DecidableEq G] [MeasurableSpace G] [DiscreteMeasurableSpace G] (
         unfold p; push_cast; ring_nf
       _ ≤ 2 * ⌈2 ^ 13 * ε⁻¹ ^ 3 * (2 * 𝓛 γ) + 2 ^ 14 * ε⁻¹ ^ 3 * 𝓛 γ⌉₊ := by
         gcongr
-        · assumption
         · norm_num
         · exact Nat.ceil_le_two_mul <| two_inv_lt_one.le.trans ‹_›
       _ = 2 * ⌈2 ^ 15 * ε⁻¹ ^ 3 * 𝓛 γ⌉₊ := by ring_nf
@@ -332,12 +328,7 @@ lemma di_in_ff [DecidableEq G] [MeasurableSpace G] [DiscreteMeasurableSpace G] (
       (le_mul_of_one_le_right zero_le_two <| by simp; positivity) ?_ hA₀
     calc
       (ε / 16)⁻¹ * log (2 / (ε / 32)) = 2 ^ 4 * ε⁻¹ ^ 1 * log (64 / ε) := by ring_nf
-      _ ≤ 2 ^ 8 * ε⁻¹ ^ 2 * log (64 / ε) := by
-        gcongr
-        · norm_num
-        · norm_num
-        · exact (one_le_inv₀ hε₀).2 hε₁.le
-        · norm_num
+      _ ≤ 2 ^ 8 * ε⁻¹ ^ 2 * log (64 / ε) := by gcongr <;> norm_num
       _ ≤ ⌈2 ^ 8 * ε⁻¹ ^ 2 * log (64 / ε)⌉₊ := Nat.le_ceil _
       _ = ↑(1 * ⌈0 + 2 ^ 8 * ε⁻¹ ^ 2 * log (64 / ε)⌉₊) := by rw [one_mul, zero_add]
       _ ≤ q' := by
@@ -599,7 +590,6 @@ public theorem ff (hq₃ : 3 ≤ q) (hq : q.Prime) (hA₀ : A.Nonempty) (hA : Th
   calc
     _ ≤ ↑q ^ (finrank (ZMod q) V : ℝ) := by
       gcongr
-      · assumption
       rw [sub_le_comm]
       calc
         n - finrank (ZMod q) V ≤ 2 ^ 148 * ⌊𝓛 α / log (65 / 64)⌋₊ * 𝓛 α ^ 8 := by

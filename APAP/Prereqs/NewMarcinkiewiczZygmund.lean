@@ -79,7 +79,7 @@ theorem marcinkiewicz_zygmund_symmetric (iIndepFun_X : iIndepFun X μ)
     -- `i₁, ..., iₙ, j₁, ..., jₙ` of `∏ k, ⟨X iₖ, X jₖ⟩`. Push the integral inside the sum.
     _ = ∑ I ∈ A ×ˢ A ^^ m, ∫ ω, ∏ k, inner ℝ (X (I k).1 ω) (X (I k).2 ω) ∂μ := by
       simp_rw [pow_mul, ← real_inner_self_eq_norm_sq, sum_inner, inner_sum, ← sum_product',
-        Finset.sum_pow', integral_finset_sum _ integrable_prod_inner_X]
+        Finset.sum_pow', integral_finsetSum _ integrable_prod_inner_X]
     -- Show that the terms coming from odd families of indices `i₁, ..., iₙ, j₁, ..., jₙ` integrate
     -- to zero.
     _ = ∑ I ∈ A ×ˢ A ^^ m with EvenIndex I, ∫ ω, ∏ k, inner ℝ (X (I k).1 ω) (X (I k).2 ω) ∂μ := by
@@ -170,7 +170,7 @@ theorem marcinkiewicz_zygmund_symmetric (iIndepFun_X : iIndepFun X μ)
     -- Put the sum back together.
     _ = marcinkiewiczZygmundSymmConst (2 * m) * ∫ ω, (∑ i ∈ A, ‖X i ω‖ ^ 2) ^ m ∂μ := by
       simp_rw [sum_pow_eq_sum_piAntidiag, ← pow_mul, ← integral_const_mul, mul_sum, ← mul_assoc]
-      rw [integral_finset_sum]
+      rw [integral_finsetSum]
       rintro w hw
       exact .const_mul sorry _
 

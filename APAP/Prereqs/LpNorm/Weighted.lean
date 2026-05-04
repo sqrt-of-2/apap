@@ -86,7 +86,7 @@ variable [Fintype α] [DiscreteMeasurableSpace α]
 lemma wLpNorm_eq_sum_norm (hp₀ : p ≠ 0) (hp : p ≠ ∞) (w : α → ℝ≥0) (f : α → E) :
     ‖f‖_[p, w] = (∑ i, w i • ‖f i‖ ^ p.toReal) ^ p.toReal⁻¹ := by
   simp [wLpNorm, lpNorm_eq_integral_norm_rpow_toReal hp₀ hp .of_discrete, NNReal.smul_def,
-    integral_finset_sum_measure]
+    integral_finsetSum_measure]
 
 lemma wLpNorm_toNNReal_eq_sum_norm {p : ℝ} (hp : 0 < p) (w : α → ℝ≥0) (f : α → E) :
     ‖f‖_[p.toNNReal, w] = (∑ i, w i • ‖f i‖ ^ p) ^ p⁻¹ := by
@@ -113,7 +113,7 @@ lemma wLpNorm_mono_right
     ‖f‖_[p, w] ≤ ‖f‖_[q, w] := by
   have : IsProbabilityMeasure (Measure.sum fun i ↦ (w i : ℝ≥0) • Measure.dirac (i : α)) := by
     rw [isProbabilityMeasure_iff, Measure.sum_apply _ MeasurableSet.univ]
-    simp [hw, ENNReal.smul_def]
+    simp [hw, ← Measure.coe_nnreal_smul]
   rw [wLpNorm, wLpNorm,
       ← toReal_eLpNorm (μ := Measure.sum fun i ↦ (w i : ℝ≥0) • Measure.dirac i)
         (MemLp.of_discrete (p := p)).aestronglyMeasurable,

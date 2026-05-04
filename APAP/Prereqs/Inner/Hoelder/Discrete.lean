@@ -85,8 +85,8 @@ variable {α : Type*} {mα : MeasurableSpace α} [DiscreteMeasurableSpace α] [F
   {p q r : ℝ≥0∞} {f g : α → 𝕜}
 
 set_option backward.isDefEq.respectTransparency false in
-lemma norm_wInner_one_le (f g : α → 𝕜) : ‖⟪f, g⟫_[𝕜]‖₊ ≤ ⟪fun a ↦ ‖f a‖, fun a ↦ ‖g a‖⟫_[ℝ] :=
-  (norm_sum_le _ _).trans <| by simp [wInner_one_eq_sum]
+lemma norm_wInner_one_le (f g : α → 𝕜) : ‖⟪f, g⟫_[𝕜]‖ ≤ ⟪fun a ↦ ‖f a‖, fun a ↦ ‖g a‖⟫_[ℝ] := by
+  grw [wInner_one_eq_sum, norm_sum_le]; simp [wInner_one_eq_sum]
 
 /-- **Hölder's inequality**, binary case. -/
 lemma nnnorm_wInner_one_le_dLpNorm_mul_dLpNorm (p q : ℝ≥0∞) [p.HolderConjugate q] :

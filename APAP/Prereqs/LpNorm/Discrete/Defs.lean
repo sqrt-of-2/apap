@@ -91,7 +91,7 @@ lemma dLpNorm_fun_div_natCast [CharZero 𝕜] {n : ℕ} (hn : n ≠ 0) (f : α �
 end NormedField
 
 lemma dLpNorm_nnqsmul (q : ℚ≥0) (f : α → ℂ) : ‖q • f‖_[p] = q * ‖f‖_[p] := by
-  simpa [NNRat.smul_def] using dLpNorm_const_smul (q : ℂ) f
+  simpa [NNRat.cast_smul_eq_nnqsmul] using dLpNorm_const_smul (q : ℂ) f
 
 section RCLike
 variable {p : ℝ≥0∞}

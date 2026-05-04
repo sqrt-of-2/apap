@@ -42,7 +42,7 @@ lemma boringEnergy_eq [Fintype G] (n : ℕ) (s : Finset G) :
   rw [← Finset.sum_fiberwise _ fun f : Fin n → G ↦ ∑ i, f i]
   congr with x
   rw [indicator_one_iterConv_apply, sq, ← nsmul_eq_mul, ← sum_const]
-  congr! 5 with f hf
+  congr! 4 with f hf
   simp_rw [(mem_filter.1 hf).2, eq_comm]
 
 @[simp] lemma boringEnergy_one [Finite G] (s : Finset G) : boringEnergy 1 s = #s := by
