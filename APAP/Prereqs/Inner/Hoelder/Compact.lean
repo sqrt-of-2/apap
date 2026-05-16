@@ -138,15 +138,15 @@ lemma norm_wInner_cWeight_le_dLpNorm_mul_dLpNorm (p q : ℝ≥0∞) [p.HolderCon
     _ ≤ ‖fun a ↦ ‖f a‖‖ₙ_[p] * ‖fun a ↦ ‖g a‖‖ₙ_[q] := wInner_cWeight_le_cLpNorm_mul_cLpNorm _ _
     _ = ‖f‖ₙ_[p] * ‖g‖ₙ_[q] := by simp_rw [cLpNorm_norm .of_discrete]
 
-omit [Fintype α]
-variable [Finite α]
-
+omit [Fintype α] in
 /-- **Hölder's inequality**, binary case. -/
-lemma cL1Norm_mul_le (p q : ℝ≥0∞) [hpq : ENNReal.HolderConjugate p q] :
+lemma cL1Norm_mul_le [Finite α] (p q : ℝ≥0∞) [hpq : ENNReal.HolderConjugate p q] :
     ‖f * g‖ₙ_[1] ≤ ‖f‖ₙ_[p] * ‖g‖ₙ_[q] := cLpNorm_mul_le _ _ one_ne_zero
 
+omit [Fintype α] in
 /-- **Hölder's inequality**, finitary case. -/
-lemma cLpNorm_prod_le {ι : Type*} {s : Finset ι} (hs : s.Nonempty) {p : ι → ℝ≥0} (hp : ∀ i, p i ≠ 0)
+lemma cLpNorm_prod_le [Finite α] {ι : Type*} {s : Finset ι} (hs : s.Nonempty)
+    {p : ι → ℝ≥0} (hp : ∀ i, p i ≠ 0)
     (q : ℝ≥0) (hpq : ∑ i ∈ s, ((p i)⁻¹ : ℝ≥0∞) = (q : ℝ≥0∞)⁻¹) (f : ι → α → 𝕜) :
     ‖∏ i ∈ s, f i‖ₙ_[q] ≤ ∏ i ∈ s, ‖f i‖ₙ_[p i] := by
   induction hs using Finset.Nonempty.cons_induction generalizing q with
@@ -154,10 +154,9 @@ lemma cLpNorm_prod_le {ι : Type*} {s : Finset ι} (hs : s.Nonempty) {p : ι →
   | cons i s hi hs ih =>
   simp_rw [prod_cons]
   rw [sum_cons, ← inv_inv (∑ _ ∈ _, _)] at hpq
-  have : ENNReal.HolderTriple (p i) ↑(∑ i ∈ s, (p i)⁻¹)⁻¹ q := by
-    have : (∑ j ∈ s, (p j)⁻¹ : ℝ≥0) ≠ 0 := by simpa [hp]
-    constructor
-    simpa [ENNReal.coe_inv, *] using hpq
+  have : ENNReal.HolderTriple (p i) ↑(∑ i ∈ s, (p i)⁻¹)⁻¹ q := ⟨by
+    simpa [ENNReal.coe_inv (by simpa [hp] :
+      (∑ j ∈ s, (p j)⁻¹ : ℝ≥0) ≠ 0), ENNReal.coe_inv, hp] using hpq⟩
   grw [cLpNorm_mul_le (p i) ↑(∑ i ∈ s, (p i)⁻¹)⁻¹ , ih]
   · rw [← ENNReal.coe_inv, inv_inv]
     · push_cast
