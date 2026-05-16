@@ -1,8 +1,13 @@
 module
 
+public import APAP.Prereqs.Convolution.Discrete.Defs
+public import APAP.Prereqs.LpNorm.Weighted
+public import APAP.Prereqs.Mu
+public import Mathlib.Analysis.RCLike.Inner
 public import Mathlib.Analysis.SpecialFunctions.Log.Basic
 public import Mathlib.Combinatorics.Additive.AP.Three.Defs
 public import Mathlib.LinearAlgebra.Dimension.Finrank
+public import Mathlib.MeasureTheory.MeasurableSpace.Defs
 
 import APAP.Physics.AlmostPeriodicity
 import APAP.Physics.DRC
@@ -103,7 +108,8 @@ private lemma curlog_pow_le {n : ℕ} (hx₀ : 0 < x) (hn : n ≠ 0) : 𝓛 (x ^
   rw [← rpow_natCast]; exact curlog_rpow_le hx₀ <| mod_cast Nat.one_le_iff_ne_zero.2 hn
 
 set_option backward.isDefEq.respectTransparency false in
-lemma global_dichotomy [DecidableEq G] [MeasurableSpace G] [DiscreteMeasurableSpace G]
+-- Public because it is in the blueprint
+public lemma global_dichotomy [DecidableEq G] [MeasurableSpace G] [DiscreteMeasurableSpace G]
     (hA : A.Nonempty) (hγC : γ ≤ C.dens) (hγ : 0 < γ)
     (hAC : ε ≤ |card G * ⟪μ_[ℝ] A ∗ᵈ μ A, μ C⟫_[ℝ] - 1|) :
     ε / (2 * card G) ≤ ‖balance (μ_[ℝ] A) ○ᵈ balance (μ A)‖_[↑(2 * ⌈𝓛 γ⌉₊), μ univ] := by
@@ -155,7 +161,8 @@ lemma global_dichotomy [DecidableEq G] [MeasurableSpace G] [DiscreteMeasurableSp
 variable {q n : ℕ} [Module (ZMod q) G] {A₁ A₂ : Finset G} (S : Finset G) {α : ℝ}
 
 set_option linter.flexible false in
-lemma ap_in_ff [DecidableEq G] (hq₃ : 3 ≤ q) (hq : q.Prime) (hα₀ : 0 < α) (hα₂ : α ≤ 2⁻¹)
+-- Public because it is in the blueprint
+public lemma ap_in_ff [DecidableEq G] (hq₃ : 3 ≤ q) (hq : q.Prime) (hα₀ : 0 < α) (hα₂ : α ≤ 2⁻¹)
     (hε₀ : 0 < ε) (hε₁ : ε ≤ 1) (hαA₁ : α ≤ A₁.dens) (hαA₂ : α ≤ A₂.dens) :
     ∃ (V : Submodule (ZMod q) G) (_ : DecidablePred (· ∈ V)),
         ↑(finrank (ZMod q) G - finrank (ZMod q) V) ≤ 2 ^ 32 * 𝓛 α ^ 2 * 𝓛 (ε * α) ^ 2 * ε⁻¹ ^ 2 ∧
@@ -264,7 +271,8 @@ set_option backward.isDefEq.respectTransparency false in
 set_option linter.flexible false in
 set_option maxHeartbeats 400000 in
 -- FIXME: Get rid of raised heartbeats
-lemma di_in_ff [DecidableEq G] [MeasurableSpace G] [DiscreteMeasurableSpace G] (hq₃ : 3 ≤ q)
+-- Public because it is in the blueprint
+public lemma di_in_ff [DecidableEq G] [MeasurableSpace G] [DiscreteMeasurableSpace G] (hq₃ : 3 ≤ q)
     (hq : q.Prime) (hε₀ : 0 < ε) (hε₁ : ε < 1) (hγC : γ ≤ C.dens) (hγ : 0 < γ)
     (hAC : ε ≤ |card G * ⟪μ_[ℝ] A ∗ᵈ μ A, μ C⟫_[ℝ] - 1|) :
     ∃ (V : Submodule (ZMod q) G) (_ : DecidablePred (· ∈ V)),

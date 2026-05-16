@@ -61,7 +61,7 @@ and now use $\lo(\epsilon\alpha/4)\leq 2\lo(\epsilon\alpha)$, say.
 
 \begin{lemma}
 \label{ast_le_circ}
-\lean{cLpNorm_cconv_le_cLpNorm_cdconv}
+\lean{cLpNorm_conv_le_cLpNorm_dconv}
 \leanok
 For any function $f:G\to \mathbb{C}$ and integer $k\geq 1$
 \[\| f\ast f\|_{2k}\leq \| f\circ f\|_{2k}.\]
@@ -174,7 +174,7 @@ and the proof is complete.
 
 \begin{lemma}
   \label{no3aps_inner_prod}
-  \lean{ThreeAPFree.wInner_one_mu_conv_mu_mu_two_smul_mu}
+  \lean{ThreeAPFree.wInner_one_mu_ddconv_mu_mu_two_smul_mu}
   \leanok
 
   If $A\subseteq G$ has no non-trivial three-term arithmetic progressions and $G$ has odd order then

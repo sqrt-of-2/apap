@@ -198,7 +198,8 @@ lemma big_shifts_step2 (L : Finset (Fin k → G)) (hk : k ≠ 0) :
 
 -- might be true for dumb reason when k = 0, since L would be singleton and rhs is |G|,
 -- so its just |S| ≤ |G|
-lemma big_shifts (S : Finset G) (L : Finset (Fin k → G)) (hk : k ≠ 0)
+-- Public because it is in the blueprint
+public lemma big_shifts (S : Finset G) (L : Finset (Fin k → G)) (hk : k ≠ 0)
     (hL' : L.Nonempty) (hL : L ⊆ A ^^ k) :
     ∃ a : Fin k → G, a ∈ L ∧
       #L * #S ≤ #(A + S) ^ k * #{t | (a - fun _ ↦ t) ∈ L} := by
@@ -235,7 +236,8 @@ def LProp (k m : ℕ) (ε : ℝ) (f : G → ℂ) (A : Finset G) (a : Fin k → G
 
 noncomputable instance : DecidablePred (LProp k m ε f A) := Classical.decPred _
 
-noncomputable def l (k m : ℕ) (ε : ℝ) (f : G → ℂ) (A : Finset G) : Finset (Fin k → G) :=
+-- Public because it is in the blueprint
+public noncomputable def l (k m : ℕ) (ε : ℝ) (f : G → ℂ) (A : Finset G) : Finset (Fin k → G) :=
   {x ∈ A ^^ k | LProp k m ε f A x}
 
 lemma lemma28_markov (hε : 0 < ε) (hm : 1 ≤ m)
@@ -275,7 +277,8 @@ lemma lemma28_part_two (hm : 1 ≤ m) (hA : A.Nonempty) :
   rw [dL1Norm_mu hA, mul_one]
 
 open MeasureTheory in
-lemma lemma28 (hε : 0 < ε) (hm : 1 ≤ m) (hk : (64 : ℝ) * m / ε ^ 2 ≤ k) :
+-- Public because it is in the blueprint
+public lemma lemma28 (hε : 0 < ε) (hm : 1 ≤ m) (hk : (64 : ℝ) * m / ε ^ 2 ≤ k) :
     (#A ^ k : ℝ) / 2 ≤ #(l k m ε f A) := by
   have : 0 < k := by
     rw [← @Nat.cast_pos ℝ]
@@ -312,7 +315,8 @@ lemma lemma28 (hε : 0 < ε) (hm : 1 ≤ m) (hk : (64 : ℝ) * m / ε ^ 2 ≤ k)
   simpa [mul_assoc] using lemma28_end hε hm hk
 
 open MeasureTheory in
-lemma just_the_triangle_inequality {t : G} {a : Fin k → G} (ha : a ∈ l k m ε f A)
+-- Public because it is in the blueprint
+public lemma just_the_triangle_inequality {t : G} {a : Fin k → G} (ha : a ∈ l k m ε f A)
     (ha' : (a + fun _ ↦ t) ∈ l k m ε f A) (hk : 0 < k) (hm : 1 ≤ m) :
     ‖τ (-t) (mu A ∗ᵈ f) - mu A ∗ᵈ f‖_[2 * m] ≤ 2 * ε * ‖f‖_[2 * m] := by
   let f₁ : G → ℂ := fun x ↦ ∑ i, f (x - a i)
@@ -380,7 +384,8 @@ lemma T_bound (hK₂ : 2 ≤ K) (Lc Sc Ac ASc Tc : ℕ) (hk : k = ⌈(64 : ℝ) 
 
 -- trivially true for other reasons for big ε
 open MeasureTheory in
-lemma almost_periodicity (ε : ℝ) (hε : 0 < ε) (hε' : ε ≤ 1) (m : ℕ) (f : G → ℂ)
+-- Public because it is in the blueprint
+public lemma almost_periodicity (ε : ℝ) (hε : 0 < ε) (hε' : ε ≤ 1) (m : ℕ) (f : G → ℂ)
     (hK₂ : 2 ≤ K) (hK : σ[A, S] ≤ K) :
     ∃ T : Finset G,
       K ^ (-512 * m / ε ^ 2 : ℝ) * #S ≤ #T ∧
@@ -415,7 +420,8 @@ lemma almost_periodicity (ε : ℝ) (hε : 0 < ε) (hε' : ε ≤ 1) (m : ℕ) (
   have := just_the_triangle_inequality ha ht hk.bot_lt hm
   rwa [neg_neg, mul_div_cancel₀ _ (two_ne_zero' ℝ)] at this
 
-theorem linfty_almost_periodicity (ε : ℝ) (hε₀ : 0 < ε) (hε₁ : ε ≤ 1) (hK₂ : 2 ≤ K)
+-- Public because it is in the blueprint
+public theorem linfty_almost_periodicity (ε : ℝ) (hε₀ : 0 < ε) (hε₁ : ε ≤ 1) (hK₂ : 2 ≤ K)
     (hK : σ[A, S] ≤ K) (B C : Finset G) (hB : B.Nonempty) (hC : C.Nonempty) :
     ∃ T : Finset G,
       K ^ (-4096 * ⌈𝓛 (#C / #B)⌉ / ε ^ 2) * #S ≤ #T ∧
