@@ -256,7 +256,7 @@ lemma sifting (B₁ B₂ : Finset G) (hε : 0 < ε) (hε₁ : ε ≤ 1) (hδ : 0
     simp_rw [← dL1Norm_dddconv mu_nonneg mu_nonneg, dL1Norm_eq_sum_norm,
       norm_of_nonneg (this _), sum_mul, mul_pow]
   calc
-    (1 - ε) ^ p ≤ exp (-ε) ^ p := by gcongr; exacts [sub_nonneg.2 hε₁, one_sub_le_exp_neg _]
+    (1 - ε) ^ p ≤ exp (-ε) ^ p := by gcongr; exact one_sub_le_exp_neg _
     _ = exp (-(ε * p)) := by rw [← neg_mul, exp_mul, rpow_natCast]
     _ ≤ exp (-log (2 / δ)) :=
       (exp_monotone <| neg_le_neg <| (inv_mul_le_iff₀ <| by positivity).1 hpε)
