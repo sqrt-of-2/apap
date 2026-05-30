@@ -62,7 +62,7 @@ lemma cLpNorm_dft_indicator_one_pow [MeasurableSpace G] [DiscreteMeasurableSpace
   · rw [cLpNorm_pow_eq_expect_norm (by positivity)]
     simp_rw [pow_mul', ← norm_pow _ n, Complex.ofReal_expect, Complex.ofReal_pow,
       ← Complex.conj_mul', wInner_cWeight_eq_expect, inner_apply', dft_iterConv_apply]
-  · simp only [wInner_one_eq_sum, inner_apply, boringEnergy_eq, Complex.ofReal_mul,
+  · simp only [wInner_one_eq_sum, RCLike.inner_apply, boringEnergy_eq, Complex.ofReal_mul,
       Complex.ofReal_sum, sq, Complex.ofReal_iterConv,
       (((isSelfAdjoint_indicator_one _).iterConv _).apply _).conj_eq,
       Complex.ofReal_comp_indicator_one]

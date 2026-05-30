@@ -37,14 +37,15 @@ lemma dddconv_eq_wInner_one (f g : G → 𝕜) (a : G) : (f ○ᵈ g) a = conj �
 lemma wInner_one_dddconv (f g h : G → 𝕜) : ⟪f, g ○ᵈ h⟫_[𝕜] = ⟪conj g, conj f ∗ᵈ conj h⟫_[𝕜] := by
   calc
     _ = ∑ b, ∑ a, g a * conj (h b) * conj (f (a - b)) := by
-      simp_rw [wInner_one_eq_sum, inner_apply, sum_dddconv_mul]
+      simp_rw [wInner_one_eq_sum, RCLike.inner_apply, sum_dddconv_mul]
       exact sum_comm
     _ = ∑ b, ∑ a, conj (f a) * conj (h b) * g (a + b) := by
       simp_rw [← Fintype.sum_prod_type']
       exact Fintype.sum_equiv ((Equiv.refl _).prodShear Equiv.subRight) _ _
         (by simp [mul_rotate, mul_right_comm])
     _ = _ := by
-      simp_rw [wInner_one_eq_sum, inner_apply, sum_ddconv_mul, Pi.conj_apply, RCLike.conj_conj]
+      simp_rw [wInner_one_eq_sum, RCLike.inner_apply, sum_ddconv_mul, Pi.conj_apply,
+        RCLike.conj_conj]
       exact sum_comm
 
 lemma wInner_one_ddconv (f g h : G → 𝕜) : ⟪f, g ∗ᵈ h⟫_[𝕜] = ⟪conj g, conj f ○ᵈ conj h⟫_[𝕜] := by
