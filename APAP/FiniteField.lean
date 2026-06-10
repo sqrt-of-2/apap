@@ -163,9 +163,8 @@ public lemma ap_in_ff [DecidableEq G] (hq₃ : 3 ≤ q) (hq : q.Prime) (hα₀ :
         ↑(finrank (ZMod q) G - finrank (ZMod q) V) ≤ 2 ^ 32 * 𝓛 α ^ 2 * 𝓛 (ε * α) ^ 2 * ε⁻¹ ^ 2 ∧
           |∑ x ∈ S, (μ (Set.toFinset V) ∗ᵈ μ A₁ ∗ᵈ μ A₂) x - ∑ x ∈ S, (μ A₁ ∗ᵈ μ A₂) x| ≤ ε := by
   classical
-  let _ : MeasurableSpace G := ⊤
+  let : MeasurableSpace G := ⊤
   have : Fact (1 < q) := ⟨hq.one_lt⟩
-  have : DiscreteMeasurableSpace G := ⟨fun _ ↦ trivial⟩
   have hA₁ : A₁.Nonempty := by simpa using hα₀.trans_le hαA₁
   have hA₂ : A₂.Nonempty := by simpa using hα₀.trans_le hαA₂
   have hα₁ : α ≤ 1 := hαA₁.trans <| mod_cast A₁.dens_le_one
@@ -516,8 +515,7 @@ public theorem ff (hq₃ : 3 ≤ q) (hq : q.Prime) (hA₀ : A.Nonempty) (hA : Th
     obtain hB' | hB' := le_or_gt 2⁻¹ (card V * ⟪μ_[ℝ] B ∗ᵈ μ B, μ (B.image (2 • ·))⟫_[ℝ])
     · exact ⟨V, inferInstance, inferInstance, inferInstance, inferInstance, B,
         hV.trans (by gcongr; exact i.le_succ), hB, hαβ, fun _ ↦ hB'⟩
-    let _ : MeasurableSpace V := ⊤
-    have : DiscreteMeasurableSpace V := ⟨fun _ ↦ trivial⟩
+    let : MeasurableSpace V := ⊤
     have : 0 < 𝓛 B.dens := curlog_pos (by positivity) (by simp)
     have : 2⁻¹ ≤ |card V * ⟪μ_[ℝ] B ∗ᵈ μ B, μ (B.image (2 • ·))⟫_[ℝ] - 1| := by
       rw [abs_sub_comm, le_abs, le_sub_comm]
