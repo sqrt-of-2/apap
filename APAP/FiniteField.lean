@@ -9,6 +9,7 @@ public import Mathlib.Combinatorics.Additive.AP.Three.Defs
 public import Mathlib.LinearAlgebra.Dimension.Finrank
 public import Mathlib.MeasureTheory.MeasurableSpace.Defs
 
+import AddCombi.Mathlib.Algebra.Order.GroupWithZero.Indicator
 import APAP.Physics.AlmostPeriodicity
 import APAP.Physics.DRC
 import APAP.Physics.Unbalancing
@@ -528,18 +529,12 @@ public theorem ff (hq₃ : 3 ≤ q) (hq : q.Prime) (hA₀ : A.Nonempty) (hA : Th
     rw [dLinftyNorm_eq_iSup_norm, ← Finset.sup'_univ_eq_ciSup, Finset.le_sup'_iff] at hv'
     obtain ⟨x, -, hx⟩ := hv'
     let B' : Finset V' := (-x +ᵥ B).preimage (↑) Set.injOn_subtype_val
-    have hβ := by
-      calc
-        ((1 + 64⁻¹ : ℝ) * B.dens : ℝ) = (1 + 2⁻¹ / 32) * B.dens := by ring
-        _ ≤ ‖(𝟭_[(B : Set V), ℝ] ∗ᵈ μ (V' : Set V).toFinset) x‖ := hx
-        _ = B'.dens := ?_
-      rw [mu, ddconv_smul, Pi.smul_apply, indicator_one_ddconv_indicator_one_eq_card_vadd_inter_neg,
-        Real.norm_of_nonneg (by positivity), nnratCast_dens, card_preimage, smul_eq_mul,
-        inv_mul_eq_div]
-      congr 2
-      · congr 1 with x
-        simp
-      · simp
+    have hβ := calc
+      ((1 + 64⁻¹ : ℝ) * B.dens : ℝ) = (1 + 2⁻¹ / 32) * B.dens := by ring
+      _ ≤ ‖(𝟭_[(B : Set V), ℝ] ∗ᵈ μ (V' : Set V).toFinset) x‖ := hx
+      _ = B'.dens := by
+        rw [Real.norm_of_nonneg (ddconv_apply_nonneg Set.indicator_one_nonneg mu_nonneg _),
+          dens_addSubgroup_preimage_vadd_eq_indicator_one_ddconv_mu]
     refine ⟨V', inferInstance, inferInstance, inferInstance, inferInstance, B', ?_, ?_, ?_,
       fun h ↦ ?_⟩
     · calc

@@ -210,6 +210,17 @@ lemma ddconv_mu_iterConv (f : G → R) (s : Finset G) (n : ℕ) :
     f ∗ᵈ μ s ∗ᵈ^ n = 𝔼 a ∈ piFinset (fun _ : Fin n ↦ s), τ (∑ i, a i) f := by
   rw [ddconv_comm, mu_iterConv_ddconv]
 
+lemma Finset.dens_addSubgroup_preimage_vadd_eq_indicator_one_ddconv_mu (a : G) (B : Finset G)
+    {S : Type*} [SetLike S G] [AddSubgroupClass S G] (V : S) [Fintype V] :
+    ((-a +ᵥ B).preimage (↑) Set.injOn_subtype_val : Finset V).dens =
+      (𝟭_[B, R] ∗ᵈ μ (V : Set G).toFinset) a := by
+  rw [mu, ddconv_smul, Pi.smul_apply, indicator_one_ddconv_indicator_one_eq_card_vadd_inter_neg,
+    nnratCast_dens, card_preimage, smul_eq_mul, inv_mul_eq_div]
+  congr
+  · congr 1 with x
+    simp
+  · simp
+
 variable [StarRing R]
 
 lemma mu_iterConv_dddconv (s : Finset G) (n : ℕ) (f : G → R) :
