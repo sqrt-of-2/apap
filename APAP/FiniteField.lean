@@ -213,8 +213,8 @@ public lemma ap_in_ff [DecidableEq G] (hq : q.Prime) (hα₀ : 0 < α) (hα₂ :
         · exact Int.ceil_le_two_mul <| two_inv_lt_one.le.trans <| one_le_curlog hα₀.le hα₁
         · calc
             k ≤ 2 * 𝓛 (ε * α / 4) :=
-              Nat.ceil_le_two_mul <| two_inv_lt_one.le.trans <| one_le_curlog (by positivity)
-                sorry
+              Nat.ceil_le_two_mul <| two_inv_lt_one.le.trans <| one_le_curlog (by positivity) <| by
+                grw [hε₁, hα₂]; norm_num
             _ ≤ 2 * (4 * 𝓛 (ε * α)) := by
               gcongr
               exact curlog_div_le (by positivity) (mul_le_one₀ hε₁ hα₀.le hα₁) (by norm_num)
@@ -245,9 +245,7 @@ public lemma ap_in_ff [DecidableEq G] (hq : q.Prime) (hα₀ : 0 < α) (hα₂ :
       _ = 2 ^ 12 * 𝓛 T.dens := by ring
       _ ≤ 2 ^ 12 * (1 + 2 ^ 19 * 𝓛 α ^ 2 * 𝓛 (ε * α) ^ 2 * ε⁻¹ ^ 2) := by gcongr
       _ ≤ 2 ^ 12 * (2 ^ 19 * 𝓛 α ^ 2 * 𝓛 (ε * α) ^ 2 * ε⁻¹ ^ 2 +
-            2 ^ 19 * 𝓛 α ^ 2 * 𝓛 (ε * α) ^ 2 * ε⁻¹ ^ 2) := by
-        gcongr
-        sorry
+            2 ^ 19 * 𝓛 α ^ 2 * 𝓛 (ε * α) ^ 2 * ε⁻¹ ^ 2) := by bound
       _ = 2 ^ 32 * 𝓛 α ^ 2 * 𝓛 (ε * α) ^ 2 * ε⁻¹ ^ 2 := by ring
   · have : ∑ x ∈ S, (μ_[ℝ] V' ∗ᵈ μ A₁ ∗ᵈ μ A₂) x = 𝔼 x ∈ V', (μ A₁ ∗ᵈ μ A₂ ○ᵈ 𝟭_[S]) x := by
       have : -V' = V' := by ext; simp [V']
