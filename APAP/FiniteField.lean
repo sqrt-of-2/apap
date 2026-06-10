@@ -157,7 +157,7 @@ variable {q n : ℕ} [Module (ZMod q) G] {A₁ A₂ : Finset G} (S : Finset G) {
 
 set_option linter.flexible false in
 -- Public because it is in the blueprint
-public lemma ap_in_ff [DecidableEq G] (hq₃ : 3 ≤ q) (hq : q.Prime) (hα₀ : 0 < α) (hα₂ : α ≤ 2⁻¹)
+public lemma ap_in_ff [DecidableEq G] (hq : q.Prime) (hα₀ : 0 < α) (hα₂ : α ≤ 2⁻¹)
     (hε₀ : 0 < ε) (hε₁ : ε ≤ 1) (hαA₁ : α ≤ A₁.dens) (hαA₂ : α ≤ A₂.dens) :
     ∃ (V : Submodule (ZMod q) G) (_ : DecidablePred (· ∈ V)),
         ↑(finrank (ZMod q) G - finrank (ZMod q) V) ≤ 2 ^ 32 * 𝓛 α ^ 2 * 𝓛 (ε * α) ^ 2 * ε⁻¹ ^ 2 ∧
@@ -254,20 +254,20 @@ public lemma ap_in_ff [DecidableEq G] (hq₃ : 3 ≤ q) (hq : q.Prime) (hα₀ :
       simp [dddconv_indicator_one_eq_sum]
     sorry
 
-lemma ap_in_ff' [DecidableEq G] (hq₃ : 3 ≤ q) (hq : q.Prime) (hα₀ : 0 < α) (hα₂ : α ≤ 2⁻¹)
+lemma ap_in_ff' [DecidableEq G] (hq : q.Prime) (hα₀ : 0 < α) (hα₂ : α ≤ 2⁻¹)
     (hε₀ : 0 < ε) (hε₁ : ε ≤ 1) (hαA₁ : α ≤ A₁.dens) (hαA₂ : α ≤ A₂.dens) :
     ∃ (V : Submodule (ZMod q) G) (_ : DecidablePred (· ∈ V)),
         ↑(finrank (ZMod q) G - finrank (ZMod q) V) ≤ 2 ^ 32 * 𝓛 α ^ 2 * 𝓛 (ε * α) ^ 2 * ε⁻¹ ^ 2 ∧
           |∑ x ∈ S, (μ (Set.toFinset V) ∗ᵈ μ A₁ ○ᵈ μ A₂) x - ∑ x ∈ S, (μ A₁ ○ᵈ μ A₂) x| ≤ ε := by
-  simpa [← conjneg_mu] using ap_in_ff S hq₃ hq (A₂ := -A₂) hα₀ hα₂ hε₀ hε₁ hαA₁ (by simpa)
+  simpa [← conjneg_mu] using ap_in_ff S hq (A₂ := -A₂) hα₀ hα₂ hε₀ hε₁ hαA₁ (by simpa)
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.flexible false in
 set_option maxHeartbeats 400000 in
 -- FIXME: Get rid of raised heartbeats
 -- Public because it is in the blueprint
-public lemma di_in_ff [DecidableEq G] [MeasurableSpace G] [DiscreteMeasurableSpace G] (hq₃ : 3 ≤ q)
-    (hq : q.Prime) (hε₀ : 0 < ε) (hε₁ : ε < 1) (hγC : γ ≤ C.dens) (hγ : 0 < γ)
+public lemma di_in_ff [DecidableEq G] [MeasurableSpace G] [DiscreteMeasurableSpace G] (hq : q.Prime)
+    (hε₀ : 0 < ε) (hε₁ : ε < 1) (hγC : γ ≤ C.dens) (hγ : 0 < γ)
     (hAC : ε ≤ |card G * ⟪μ_[ℝ] A ∗ᵈ μ A, μ C⟫_[ℝ] - 1|) :
     ∃ (V : Submodule (ZMod q) G) (_ : DecidablePred (· ∈ V)),
         ↑(finrank (ZMod q) G - finrank (ZMod q) V) ≤
@@ -376,7 +376,7 @@ public lemma di_in_ff [DecidableEq G] [MeasurableSpace G] [DiscreteMeasurableSpa
         2 ^ 32 * 𝓛 (4⁻¹ * α ^ (2 * q')) ^ 2 * 𝓛 (ε / 32 * (4⁻¹ * α ^ (2 * q'))) ^ 2 * (ε / 32)⁻¹ ^ 2
           ∧ |∑ x ∈ s', (μ (Set.toFinset V) ∗ᵈ μ A₁ ○ᵈ μ A₂) x -
             ∑ x ∈ s', (μ A₁ ○ᵈ μ A₂) x| ≤ ε / 32 :=
-    ap_in_ff' _ hq₃ hq (by positivity)
+    ap_in_ff' _ hq (by positivity)
     (calc
       4⁻¹ * (A.dens : ℝ) ^ (2 * q') ≤ 4⁻¹ * 1 := by
         gcongr; exact pow_le_one₀ (by positivity) <| mod_cast A.dens_le_one
@@ -521,7 +521,7 @@ public theorem ff (hq₃ : 3 ≤ q) (hq : q.Prime) (hA₀ : A.Nonempty) (hA : Th
       rw [abs_sub_comm, le_abs, le_sub_comm]
       norm_num at hB' ⊢
       exact .inl hB'.le
-    obtain ⟨V', _, hVV', hv'⟩ := di_in_ff hq₃ hq (by positivity) two_inv_lt_one (by
+    obtain ⟨V', _, hVV', hv'⟩ := di_in_ff hq (by positivity) two_inv_lt_one (by
       rwa [Finset.dens_image (Nat.Coprime.nsmul_right_bijective _)]
       simpa [Module.card_eq_pow_finrank (K := ZMod q) (V := V), ZMod.card] using hq'.pow) hα₀ this
     rw [dLinftyNorm_eq_iSup_norm, ← Finset.sup'_univ_eq_ciSup, Finset.le_sup'_iff] at hv'
