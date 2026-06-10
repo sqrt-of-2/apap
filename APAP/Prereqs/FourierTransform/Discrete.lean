@@ -21,7 +21,7 @@ Fourier inversion formula for it.
 @[expose] public section
 
 open AddChar Finset Fintype Function MeasureTheory RCLike
-open scoped BigOperators ComplexConjugate ComplexOrder Indicator translate
+open scoped BigOperators ComplexConjugate ComplexOrder ENNReal Indicator NNReal translate
 
 variable {G : Type*} [AddCommGroup G] [Fintype G] {f : G → ℂ} {ψ : AddChar G ℂ} {n : ℕ}
 
@@ -29,6 +29,17 @@ variable {G : Type*} [AddCommGroup G] [Fintype G] {f : G → ℂ} {ψ : AddChar 
 noncomputable def dft (f : G → ℂ) : AddChar G ℂ → ℂ := fun ψ ↦ ⟪ψ, f⟫_[ℂ]
 
 lemma dft_apply (f : G → ℂ) (ψ : AddChar G ℂ) : dft f ψ = ⟪ψ, f⟫_[ℂ] := rfl
+
+/-- A special case of the **Hausdorff-Young inequality** for the discrete Fourier transform. -/
+lemma norm_dft_le_dL1Norm [MeasurableSpace G] [DiscreteMeasurableSpace G] (f : G → ℂ)
+    (ψ : AddChar G ℂ) : ‖dft f ψ‖ ≤ ‖f‖_[1] := by
+  grw [dft_apply, norm_wInner_one_le_dLpNorm_mul_dLpNorm ∞ 1, dLinftyNorm_eq_iSup_norm]
+  simp [AddChar.norm_apply]
+
+/-- A special case of the **Hausdorff-Young inequality** for the discrete Fourier transform. -/
+lemma cLinftyNorm_dft_le_dL1Norm [MeasurableSpace G] [DiscreteMeasurableSpace G] (f : G → ℂ) :
+    ‖dft f‖ₙ_[∞] ≤ ‖f‖_[1] := by
+  rw [cLpNorm_exponent_top_eq_essSup]; exact ciSup_le fun ψ ↦ norm_dft_le_dL1Norm f ψ
 
 @[simp] lemma dft_zero : dft (0 : G → ℂ) = 0 := by ext; simp [dft_apply]
 
