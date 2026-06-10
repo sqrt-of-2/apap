@@ -1,4 +1,4 @@
-module
+module  -- shake: keep-all
 
 public import APAP.FiniteField
 public import APAP.Integer
@@ -7,6 +7,7 @@ public import APAP.Mathlib.Algebra.BigOperators.Pi
 public import APAP.Mathlib.Algebra.Group.Action.Pointwise.Set.Basic
 public import APAP.Mathlib.Algebra.Group.Pointwise.Set.Basic
 public import APAP.Mathlib.Algebra.Group.Translate
+public import APAP.Mathlib.Algebra.Order.Group.Parity
 public import APAP.Mathlib.Algebra.Star.Conjneg
 public import APAP.Mathlib.Algebra.Star.SelfAdjoint
 public import APAP.Mathlib.Analysis.Complex.Circle

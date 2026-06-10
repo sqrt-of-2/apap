@@ -264,7 +264,7 @@ lemma sifting (B₁ B₂ : Finset G) (hε : 0 < ε) (hε₁ : ε ≤ 1) (hδ : 0
 
 -- TODO: When `1 < ε`, the result is trivial since `S = univ`.
 /-- Special case of `sifting` when `B₁ = B₂ = univ`. -/
-lemma sifting_cor (hε : 0 < ε) (hε₁ : ε ≤ 1) (hδ : 0 < δ) (hp : Even p) (hp₂ : 2 ≤ p)
+lemma sifting_cor (hε : 0 < ε) (hε₁ : ε ≤ 1) (hδ : 0 < δ) (hp : Even p) (hp₀ : p ≠ 0)
     (hpε : ε⁻¹ * log (2 / δ) ≤ p) (hA : A.Nonempty) :
     ∃ A₁ A₂, 1 - δ ≤ ∑ x ∈ s p ε univ univ A, (μ A₁ ○ᵈ μ A₂) x ∧
         (4 : ℝ)⁻¹ * A.dens ^ (2 * p) ≤ A₁.dens ∧
@@ -283,9 +283,10 @@ lemma sifting_cor (hε : 0 < ε) (hε₁ : ε ≤ 1) (hδ : 0 < δ) (hp : Even p
       calc
         _ = (‖𝟭_[(A : Set G), ℝ] ○ᵈ 𝟭_[A]‖_[1, μ univ] : ℝ) := by
           simp [mu, wLpNorm_smul_right, dL1Norm_dddconv, card_univ, inv_mul_eq_div]
-        _ ≤ _ := wLpNorm_mono_right hμ_univ (one_le_two.trans <| by norm_cast) _
+        _ ≤ _ := wLpNorm_mono_right hμ_univ
+          (one_le_two.trans <| by obtain ⟨k, rfl⟩ := hp; norm_cast; lia) _
     obtain ⟨A₁, -, A₂, -, h, hcard₁, hcard₂⟩ :=
-      sifting univ univ hε hε₁ hδ hp hp₂ hpε (by simp) hA (by simpa)
+      sifting univ univ hε hε₁ hδ hp (by obtain ⟨k, rfl⟩ := hp; lia) hpε (by simp) hA (by simpa)
     exact ⟨A₁, A₂, h, this.trans <| by simpa [nnratCast_dens] using hcard₁,
       this.trans <| by simpa [nnratCast_dens] using hcard₂⟩
   · refine ⟨A, A, ?_, ?_⟩

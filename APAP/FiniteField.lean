@@ -10,6 +10,7 @@ public import Mathlib.LinearAlgebra.Dimension.Finrank
 public import Mathlib.MeasureTheory.MeasurableSpace.Defs
 
 import AddCombi.Mathlib.Algebra.Order.GroupWithZero.Indicator
+import APAP.Mathlib.Algebra.Order.Group.Parity
 import APAP.Physics.AlmostPeriodicity
 import APAP.Physics.DRC
 import APAP.Physics.Unbalancing
@@ -43,7 +44,7 @@ open scoped ENNReal NNReal BigOperators Combinatorics.Additive Pointwise Indicat
 universe u
 variable {G : Type u} [AddCommGroup G] [Fintype G] {A C : Finset G} {x y γ ε : ℝ}
 
-local notation "𝓛" x:arg => 1 + log x⁻¹
+local notation3 "𝓛" x:arg => 1 + log x⁻¹
 
 lemma one_le_curlog (hx₀ : 0 ≤ x) (hx₁ : x ≤ 1) : 1 ≤ 𝓛 x := by
   obtain rfl | hx₀ := hx₀.eq_or_lt
@@ -174,17 +175,14 @@ public lemma ap_in_ff [DecidableEq G] (hq : q.Prime) (hα₀ : 0 < α) (hα₂ :
   · refine ⟨⊤, inferInstance, ?_, by simp [hε₀.le]⟩
     simp only [finrank_top, tsub_self, CharP.cast_eq_zero, mul_inv_rev, inv_pow]
     positivity
-  have hA₁ : σ[A₁, univ] ≤ α⁻¹ :=
-    calc
-      _ ≤ (A₁.dens⁻¹ : ℝ) := by norm_cast; exact addConst_le_inv_dens
-      _ ≤ α⁻¹ := by gcongr
+  have hσA₁ : σ[A₁, univ] ≤ α⁻¹ := by grw [addConst_le_inv_dens, hαA₁, NNRat.cast_inv]
   let k : ℕ := ⌈𝓛 (ε * α / 4)⌉₊
   have hk₀ : 0 < k := Nat.ceil_pos.2 <| curlog_pos (by positivity) <|
     calc
       ε * α / 4 ≤ ε * 1 / 4 := by gcongr
       _ ≤ 1 := by linarith
   obtain ⟨T, hTcard, hTε⟩ := AlmostPeriodicity.linfty_almost_periodicity_boosted ε hε₀ hε₁ k
-    (by positivity) (le_inv_of_le_inv₀ (by positivity) hα₂) hA₁ univ_nonempty S A₂ hS hA₂
+    (by positivity) (le_inv_of_le_inv₀ (by positivity) hα₂) hσA₁ univ_nonempty S A₂ hS hA₂
   have hT : 0 < (#T : ℝ) := hTcard.trans_lt' (by positivity)
   replace hT : T.Nonempty := by simpa using hT
   let Δ := largeSpec (μ T) 2⁻¹
@@ -195,29 +193,28 @@ public lemma ap_in_ff [DecidableEq G] (hq : q.Prime) (hα₀ : 0 < α) (hα₂ :
     let W : Submodule (ZMod q) G := AddSubgroup.toZModSubmodule _ <| ⨅ γ ∈ Δ', γ.toAddMonoidHom.ker
     have mem_W {x} : x ∈ W ↔ ∀ γ ∈ Δ', γ x = 1 := by simp [W]
     have hWV : W ≤ V := by sorry
-    have :=
-      calc
-        log T.dens⁻¹ ≤ log (α⁻¹ ^ (-4096 * ⌈𝓛 (min 1 (#A₂ / #S))⌉ * k ^ 2 / ε ^ 2))⁻¹ := by
-          gcongr; rwa [nnratCast_dens, le_div_iff₀]; positivity
-        _ = 2 ^ 12 * log α⁻¹ * ⌈𝓛 (min 1 (#A₂ / #S))⌉ * k ^ 2 / ε ^ 2 := by
-          rw [log_inv, log_rpow (by positivity)]; ring_nf
-        _ ≤ 2 ^ 12 * log α⁻¹ * ⌈𝓛 (min 1 A₂.dens)⌉ * k ^ 2 / ε ^ 2 := by
-          rw [nnratCast_dens, ← card_univ]; gcongr; exact S.subset_univ
-        _ ≤ 2 ^ 12 * log α⁻¹ * ⌈𝓛 (min 1 α)⌉ * (k) ^ 2 / ε ^ 2 := by gcongr
-        _ = 2 ^ 12 * log α⁻¹ * ⌈𝓛 α⌉ * k ^ 2 / ε ^ 2 := by rw [min_eq_right hα₁]
-        _ ≤ 2 ^ 12 * 𝓛 α * (2 * 𝓛 α) * (2 ^ 3 * 𝓛 (ε * α)) ^ 2 / ε ^ 2 := by
-          gcongr
-          · exact le_add_of_nonneg_left zero_le_one
-          · exact Int.ceil_le_two_mul <| two_inv_lt_one.le.trans <| one_le_curlog hα₀.le hα₁
-          · calc
-              k ≤ 2 * 𝓛 (ε * α / 4) :=
-                Nat.ceil_le_two_mul <| two_inv_lt_one.le.trans <| one_le_curlog (by positivity)
-                  sorry
-              _ ≤ 2 * (4 * 𝓛 (ε * α)) := by
-                gcongr
-                exact curlog_div_le (by positivity) (mul_le_one₀ hε₁ hα₀.le hα₁) (by norm_num)
-              _ = 2 ^ 3 * 𝓛 (ε * α) := by ring
-        _ = 2 ^ 19 * 𝓛 α ^ 2 * 𝓛 (ε * α) ^ 2 * ε⁻¹ ^ 2 := by ring_nf
+    have := calc
+      log T.dens⁻¹ ≤ log (α⁻¹ ^ (-4096 * ⌈𝓛 (min 1 (#A₂ / #S))⌉ * k ^ 2 / ε ^ 2))⁻¹ := by
+        gcongr; rwa [nnratCast_dens, le_div_iff₀]; positivity
+      _ = 2 ^ 12 * log α⁻¹ * ⌈𝓛 (min 1 (#A₂ / #S))⌉ * k ^ 2 / ε ^ 2 := by
+        rw [log_inv, log_rpow (by positivity)]; ring_nf
+      _ ≤ 2 ^ 12 * log α⁻¹ * ⌈𝓛 (min 1 A₂.dens)⌉ * k ^ 2 / ε ^ 2 := by
+        rw [nnratCast_dens, ← card_univ]; gcongr; exact S.subset_univ
+      _ ≤ 2 ^ 12 * log α⁻¹ * ⌈𝓛 (min 1 α)⌉ * (k) ^ 2 / ε ^ 2 := by gcongr
+      _ = 2 ^ 12 * log α⁻¹ * ⌈𝓛 α⌉ * k ^ 2 / ε ^ 2 := by rw [min_eq_right hα₁]
+      _ ≤ 2 ^ 12 * 𝓛 α * (2 * 𝓛 α) * (2 ^ 3 * 𝓛 (ε * α)) ^ 2 / ε ^ 2 := by
+        gcongr
+        · exact le_add_of_nonneg_left zero_le_one
+        · exact Int.ceil_le_two_mul <| two_inv_lt_one.le.trans <| one_le_curlog hα₀.le hα₁
+        · calc
+            k ≤ 2 * 𝓛 (ε * α / 4) :=
+              Nat.ceil_le_two_mul <| two_inv_lt_one.le.trans <| one_le_curlog (by positivity)
+                sorry
+            _ ≤ 2 * (4 * 𝓛 (ε * α)) := by
+              gcongr
+              exact curlog_div_le (by positivity) (mul_le_one₀ hε₁ hα₀.le hα₁) (by norm_num)
+            _ = 2 ^ 3 * 𝓛 (ε * α) := by ring
+      _ = 2 ^ 19 * 𝓛 α ^ 2 * 𝓛 (ε * α) ^ 2 * ε⁻¹ ^ 2 := by ring_nf
     calc
       (↑(finrank (ZMod q) G - finrank (ZMod q) V) : ℝ)
         ≤ ↑(finrank (ZMod q) G - finrank (ZMod q) W) := by
@@ -272,18 +269,27 @@ public lemma di_in_ff [DecidableEq G] [MeasurableSpace G] [DiscreteMeasurableSpa
     (hAC : ε ≤ |card G * ⟪μ_[ℝ] A ∗ᵈ μ A, μ C⟫_[ℝ] - 1|) :
     ∃ (V : Submodule (ZMod q) G) (_ : DecidablePred (· ∈ V)),
         ↑(finrank (ZMod q) G - finrank (ZMod q) V) ≤
-            2 ^ 132 * 𝓛 A.dens ^ 4 * 𝓛 γ ^ 4 / ε ^ 16 ∧
+            2 ^ 128 * 𝓛 A.dens ^ 4 * 𝓛 γ ^ 4 / ε ^ 12 ∧
           (1 + ε / 32) * A.dens ≤ ‖𝟭_[(A : Set G), ℝ] ∗ᵈ μ (Set.toFinset V)‖_[∞] := by
   have hγ₁ : γ ≤ 1 := hγC.trans (by norm_cast; exact dens_le_one)
-  let α : ℝ := A.dens
-  let p : ℕ := 2 * ⌈𝓛 γ⌉₊
-  let f : G → ℝ := balance (μ A)
   obtain rfl | hA₀ := A.eq_empty_or_nonempty
   · refine ⟨⊤, Classical.decPred _, ?_, by simp⟩
     simp only [finrank_top, tsub_self, CharP.cast_eq_zero, dens_empty, NNRat.cast_zero, inv_zero,
       log_zero, add_zero, one_pow, mul_one]
     positivity
-  obtain ⟨p', hp', unbalancing⟩ :
+  have hε₁' : 1 ≤ ε⁻¹ := (one_le_inv₀ hε₀).2 hε₁.le
+  let α : ℝ := A.dens
+  have hα₀ : 0 < α := by positivity
+  have hα₁ : α ≤ 1 := by unfold α; exact mod_cast A.dens_le_one
+  have : 0 ≤ log γ⁻¹ := log_nonneg <| (one_le_inv₀ hγ).2 hγ₁
+  have : 0 < 𝓛 γ := curlog_pos hγ.le hγ₁
+  have : 1 ≤ 𝓛 γ := one_le_curlog hγ.le hγ₁
+  let p : ℕ := 2 * ⌈𝓛 γ⌉₊
+  have hpupper : p ≤ 4 * 𝓛 γ := by
+    unfold p; push_cast; grw [Nat.ceil_le_two_mul (by linarith)]; grind
+  have : 0 < p := by positivity
+  let f : G → ℝ := balance (μ A)
+  obtain ⟨p', hp'upper, unbalancing⟩ :
     ∃ p' : ℕ, p' ≤ 2 ^ 10 * (ε / 2)⁻¹ ^ 2 * p ∧
       1 + ε / 2 / 2 ≤ ‖card G • (f ○ᵈ f) + 1‖_[p', μ univ] := by
     refine unbalancing _ (mul_ne_zero two_ne_zero (Nat.ceil_pos.2 <| curlog_pos hγ.le hγ₁).ne')
@@ -295,74 +301,44 @@ public lemma di_in_ff [DecidableEq G] [MeasurableSpace G] [DiscreteMeasurableSpa
     · have global_dichotomy := global_dichotomy hA₀ hγC hγ hAC
       simpa [wLpNorm_nsmul, ← nsmul_eq_mul, div_le_iff₀' (show (0 : ℝ) < card G by positivity),
         ← div_div, rpow_neg, inv_rpow] using global_dichotomy
-  let q' : ℕ := 2 * ⌈p' + 2 ^ 8 * ε⁻¹ ^ 2 * log (64 / ε)⌉₊
-  have : 0 < 𝓛 γ := curlog_pos hγ.le hγ₁
-  have hα₀ : 0 < α := by positivity
-  have hα₁ : α ≤ 1 := by unfold α; exact mod_cast A.dens_le_one
-  have : 0 < p := by positivity
-  have : 0 < log (6 / ε) := log_pos <| (one_lt_div hε₀).2 (by linarith)
   have : 0 < p' := pos_iff_ne_zero.2 <| by rintro rfl; simp at unbalancing; linarith
-  have : 0 < log (64 / ε) := log_pos <| (one_lt_div hε₀).2 (by linarith)
-  have : 1 ≤ 𝓛 γ := one_le_curlog hγ.le hγ₁
+  let q' : ℕ := max (2 * p') (2 ^ 4 * ⌈ε⁻¹ * log (64 / ε)⌉₊)
   have : 0 < q' := by positivity
-  have : 1 ≤ ε⁻¹ := (one_le_inv₀ hε₀).2 hε₁.le
-  have :=
-    calc
-      (q' : ℝ) ≤ ↑(2 * ⌈2 ^ 10 * (ε / 2)⁻¹ ^ 2 * p + 2 ^ 8 * ε⁻¹ ^ 2 * (64 / ε)⌉₊) := by
-        unfold q'; gcongr; exact log_le_self (by positivity)
-      _ = 2 * ⌈2 ^ 13 * ε⁻¹ ^ 2 * ⌈𝓛 γ⌉₊ + 2 ^ 14 * ε⁻¹ ^ 3 * 1⌉₊ := by
-        unfold p; push_cast; ring_nf
-      _ ≤ 2 * ⌈2 ^ 13 * ε⁻¹ ^ 3 * (2 * 𝓛 γ) + 2 ^ 14 * ε⁻¹ ^ 3 * 𝓛 γ⌉₊ := by
-        gcongr
-        · norm_num
-        · exact Nat.ceil_le_two_mul <| two_inv_lt_one.le.trans ‹_›
-      _ = 2 * ⌈2 ^ 15 * ε⁻¹ ^ 3 * 𝓛 γ⌉₊ := by ring_nf
-      _ ≤ 2 * (2 * (2 ^ 15 * ε⁻¹ ^ 3 * 𝓛 γ)) := by
-        gcongr
-        refine Nat.ceil_le_two_mul ?_
-        calc
-          (2⁻¹ : ℝ) ≤ 2 ^ 15 * 1 * 1 := by norm_num
-          _ ≤ 2 ^ 15 * ε⁻¹ ^ 3 * 𝓛 γ := ?_
-        gcongr
-        exact one_le_pow₀ ((one_le_inv₀ hε₀).2 hε₁.le)
-      _ = 2 ^ 17 * 𝓛 γ / ε ^ 3 := by ring
+  have hq'even : Even q' := (even_two_mul _).max ((even_two.pow_of_ne_zero <| by lia).mul_right _)
+  have hp'q' : p' ≤ q' := by unfold q'; grw [← le_max_left]; lia
+  have hq'lower : 2 ^ 4 * ε⁻¹ * log (64 / ε) ≤ q' := by
+    unfold q'; grw [mul_assoc, ← le_max_right]; push_cast; grw [← Nat.le_ceil]; norm_num
+  have hq'upper : q' ≤ 2 ^ 16 * 𝓛 γ / ε ^ 2 := by
+    unfold q'
+    push_cast
+    grw [hp'upper, hpupper, max_le_add_of_nonneg (by positivity) (by positivity),
+      (64 / ε).log_le_self (by positivity)]
+    ring_nf
+    grw [Nat.ceil_le_two_mul <| by grw [← hε₁']; norm_num]
+    ring_nf
+    bound
+  have : 0 < log (6 / ε) := log_pos <| (one_lt_div hε₀).2 (by linarith)
+  have : 0 < log (64 / ε) := log_pos <| (one_lt_div hε₀).2 (by linarith)
   obtain ⟨A₁, A₂, hA, hA₁, hA₂⟩ : ∃ (A₁ A₂ : Finset G),
       1 - ε / 32 ≤ ∑ x ∈ s q' (ε / 16) univ univ A, (μ A₁ ○ᵈ μ A₂) x ∧
         (4⁻¹ : ℝ) * A.dens ^ (2 * q') ≤ A₁.dens ∧ (4⁻¹ : ℝ) * A.dens ^ (2 * q') ≤ A₂.dens := by
-    refine sifting_cor (ε := ε / 16) (δ := ε / 32) (by positivity) (by linarith)
-      (by positivity) (p := q') (even_two_mul _)
-      (le_mul_of_one_le_right zero_le_two <| by lia) ?_ hA₀
+    refine sifting_cor (by positivity) (by linarith) (by positivity)
+      hq'even (by positivity) ?_ hA₀
     calc
-      (ε / 16)⁻¹ * log (2 / (ε / 32)) = 2 ^ 4 * ε⁻¹ ^ 1 * log (64 / ε) := by ring_nf
-      _ ≤ 2 ^ 8 * ε⁻¹ ^ 2 * log (64 / ε) := by gcongr <;> norm_num
-      _ ≤ ⌈2 ^ 8 * ε⁻¹ ^ 2 * log (64 / ε)⌉₊ := Nat.le_ceil _
-      _ = ↑(1 * ⌈0 + 2 ^ 8 * ε⁻¹ ^ 2 * log (64 / ε)⌉₊) := by rw [one_mul, zero_add]
-      _ ≤ q' := by
-        unfold q'
-        gcongr
-        · norm_num
-        · positivity
-  have hp'q' : p' ≤ q' :=
-    calc
-      p' = 1 * ⌈(p' + 0 : ℝ)⌉₊ := by simp
-      _ ≤ q' := by
-        unfold q'
-        gcongr
-        · norm_num
-        · positivity
+      (ε / 16)⁻¹ * log (2 / (ε / 32)) = 2 ^ 4 * ε⁻¹ * log (64 / ε) := by ring_nf
+      _ ≤ q' := hq'lower
   have : card G • (f ○ᵈ f) + 1 = card G • (μ A ○ᵈ μ A) := by
     unfold f
     rw [← balance_dddconv, balance, smul_sub, smul_const, Fintype.card_smul_expect]
     simp [sum_dddconv, hA₀]
-  have :=
-    calc
-      1 + ε / 4 = 1 + ε / 2 / 2 := by ring
-      _ ≤ ‖card G • (f ○ᵈ f) + 1‖_[p', μ univ] := unbalancing
-      _ = card G • ‖(μ_[ℝ] A ○ᵈ μ A)‖_[p', μ univ] := by simp [this, wLpNorm_nsmul, -nsmul_eq_mul]
-      _ ≤ card G • ‖(μ_[ℝ] A ○ᵈ μ A)‖_[q', μ univ] := by
-        have : Nonempty G := hA₀.to_type
-        gcongr
-        exact mod_cast sum_mu ℝ≥0 univ_nonempty
+  have := calc
+    1 + ε / 4 = 1 + ε / 2 / 2 := by ring
+    _ ≤ ‖card G • (f ○ᵈ f) + 1‖_[p', μ univ] := unbalancing
+    _ = card G • ‖(μ_[ℝ] A ○ᵈ μ A)‖_[p', μ univ] := by simp [this, wLpNorm_nsmul, -nsmul_eq_mul]
+    _ ≤ card G • ‖(μ_[ℝ] A ○ᵈ μ A)‖_[q', μ univ] := by
+      have : Nonempty G := hA₀.to_type
+      gcongr
+      exact mod_cast sum_mu ℝ≥0 univ_nonempty
   let s' : Finset G := {x | 1 + ε / 8 ≤ card G • (μ A ○ᵈ μ A) x}
   have hss' : s q' (ε / 16) univ univ A ⊆ s' := by
     simp only [subset_iff, mem_s', ENNReal.coe_natCast, mu_univ_dddconv_mu_univ,
@@ -410,12 +386,11 @@ public lemma di_in_ff [DecidableEq G] [MeasurableSpace G] [DiscreteMeasurableSpa
         have : 0 ≤ log (ε / 32 * (4⁻¹ * α ^ (2 * q')))⁻¹ := by bound
         have : 0 ≤ log (4⁻¹ * α ^ (2 * q'))⁻¹ := by bound
         have : 0 ≤ log (α ^ (2 * q'))⁻¹ := by bound
-        have :=
-          calc
-            𝓛 (4⁻¹ * α ^ (2 * q')) ≤ 4⁻¹⁻¹ * 𝓛 (α ^ (2 * q')) :=
-              curlog_mul_le (by norm_num) (by norm_num) (by positivity) ‹_›
-            _ ≤ 4⁻¹⁻¹ * (↑(2 * q') *  𝓛 α) := by gcongr; exact curlog_pow_le hα₀ (by positivity)
-            _ = 8 * q' * 𝓛 α := by push_cast; ring
+        have := calc
+          𝓛 (4⁻¹ * α ^ (2 * q')) ≤ 4⁻¹⁻¹ * 𝓛 (α ^ (2 * q')) :=
+            curlog_mul_le (by norm_num) (by norm_num) (by positivity) ‹_›
+          _ ≤ 4⁻¹⁻¹ * (↑(2 * q') *  𝓛 α) := by gcongr; exact curlog_pow_le hα₀ (by positivity)
+          _ = 8 * q' * 𝓛 α := by push_cast; ring
         gcongr
         calc
           𝓛 (ε / 32 * (4⁻¹ * α ^ (2 * q'))) ≤ (ε / 32)⁻¹ * 𝓛 (4⁻¹ * (α ^ (2 * q'))) :=
@@ -423,8 +398,8 @@ public lemma di_in_ff [DecidableEq G] [MeasurableSpace G] [DiscreteMeasurableSpa
           _ ≤ (ε / 32)⁻¹ * (8 * q' * 𝓛 α) := by gcongr
           _ = 2 ^ 8 * q' * 𝓛 α / ε := by ring
       _ = 2 ^ 64 * q' ^ 4 * 𝓛 α ^ 4 / ε ^ 4 := by ring
-      _ ≤ 2 ^ 64 * (2 ^ 17 * 𝓛 γ / ε ^ 3) ^ 4 * 𝓛 α ^ 4 / ε ^ 4 := by gcongr
-      _ = 2 ^ 132 * 𝓛 α ^ 4 * 𝓛 γ ^ 4 / ε ^ 16 := by ring
+      _ ≤ 2 ^ 64 * (2 ^ 16 * 𝓛 γ / ε ^ 2) ^ 4 * 𝓛 α ^ 4 / ε ^ 4 := by gcongr
+      _ = 2 ^ 128 * 𝓛 α ^ 4 * 𝓛 γ ^ 4 / ε ^ 12 := by ring
   · rw [← le_div_iff₀ (by positivity)]
     have : 0 ≤ μ_[ℝ] (Set.toFinset V) ∗ᵈ μ A₁ ○ᵈ μ A₂ :=
       dddconv_nonneg (ddconv_nonneg mu_nonneg mu_nonneg) mu_nonneg
@@ -469,7 +444,7 @@ public lemma di_in_ff [DecidableEq G] [MeasurableSpace G] [DiscreteMeasurableSpa
         · exact mu_nonneg
 
 public theorem ff (hq₃ : 3 ≤ q) (hq : q.Prime) (hA₀ : A.Nonempty) (hA : ThreeAPFree (α := G) A) :
-    finrank (ZMod q) G ≤ 2 ^ 156 * 𝓛 A.dens ^ 9 := by
+    finrank (ZMod q) G ≤ 2 ^ 148 * 𝓛 A.dens ^ 9 := by
   let n : ℝ := finrank (ZMod q) G
   let α : ℝ := A.dens
   have : 1 < (q : ℝ) := mod_cast hq₃.trans_lt' (by norm_num)
@@ -489,21 +464,16 @@ public theorem ff (hq₃ : 3 ≤ q) (hq : q.Prime) (hA₀ : A.Nonempty) (hA : Th
     calc
       _ ≤ (log 2 + 2 * log α⁻¹) / (log q / 2) := hα
       _ = 4 / log q * (log 2 / 2 + log α⁻¹) := by ring
-      _ ≤ 2 ^ 156 * (1 + 0) ^ 8 * (1 + log α⁻¹) := by
+      _ ≤ 2 ^ 148 * 𝓛 α ^ 9 := by
+        grw [← hq₃, pow_succ _ 8, ← mul_assoc, log_two_lt_d9]
         gcongr
-        · calc
-            4 / log q ≤ 4 / log 3 := by gcongr; assumption_mod_cast
-            _ ≤ 4 / log 2 := by gcongr; norm_num
-            _ ≤ 4 / 0.6931471803 := by gcongr; exact log_two_gt_d9.le
-            _ ≤ 2 ^ 156 * (1 + 0) ^ 8 := by norm_num
-        · calc
-            log 2 / 2 ≤ 0.6931471808 / 2 := by gcongr; exact log_two_lt_d9.le
-            _ ≤ 1 := by norm_num
-      _ ≤ 2 ^ 156 * 𝓛 α ^ 8 * 𝓛 α := by gcongr
-      _ = 2 ^ 156 * 𝓛 α ^ 9 := by rw [pow_succ _ 8, mul_assoc]
+        · norm_cast
+          grw [← log_three_gt_d9, ← ‹1 ≤ α⁻¹›]
+          norm_num
+        · bound
   have ind (i : ℕ) :
     ∃ (V : Type u) (_ : AddCommGroup V) (_ : Fintype V) (_ : DecidableEq V) (_ : Module (ZMod q) V)
-      (B : Finset V), n ≤ finrank (ZMod q) V + 2 ^ 148 * i * 𝓛 α ^ 8 ∧ ThreeAPFree (B : Set V)
+      (B : Finset V), n ≤ finrank (ZMod q) V + 2 ^ 140 * i * 𝓛 α ^ 8 ∧ ThreeAPFree (B : Set V)
         ∧ α ≤ B.dens ∧
       (B.dens < (65 / 64 : ℝ) ^ i * α →
         2⁻¹ ≤ card V * ⟪μ_[ℝ] B ∗ᵈ μ B, μ (B.image (2 • ·))⟫_[ℝ]) := by
@@ -538,13 +508,13 @@ public theorem ff (hq₃ : 3 ≤ q) (hq : q.Prime) (hA₀ : A.Nonempty) (hA : Th
     refine ⟨V', inferInstance, inferInstance, inferInstance, inferInstance, B', ?_, ?_, ?_,
       fun h ↦ ?_⟩
     · calc
-        n ≤ finrank (ZMod q) V + 2 ^ 148 * i * 𝓛 α ^ 8 := hV
+        n ≤ finrank (ZMod q) V + 2 ^ 140 * i * 𝓛 α ^ 8 := hV
         _ ≤ finrank (ZMod q) V' + ↑(finrank (ZMod q) V - finrank (ZMod q) V') +
-            2 ^ 148 * i * 𝓛 α ^ 8 := by gcongr; norm_cast; exact le_add_tsub
-        _ ≤ finrank (ZMod q) V' + 2 ^ 132 * 𝓛 B.dens ^ 4 * 𝓛 α ^ 4 / 2⁻¹ ^ 16 +
-            2 ^ 148 * i * 𝓛 α ^ 8 := by gcongr
-        _ ≤ finrank (ZMod q) V' + 2 ^ 132 * 𝓛 α ^ 4 * 𝓛 α ^ 4 / 2⁻¹ ^ 16 +
-            2 ^ 148 * i * 𝓛 α ^ 8 := by have := hα₀.trans_le hαβ; gcongr
+            2 ^ 140 * i * 𝓛 α ^ 8 := by gcongr; norm_cast; exact le_add_tsub
+        _ ≤ finrank (ZMod q) V' + 2 ^ 128 * 𝓛 B.dens ^ 4 * 𝓛 α ^ 4 / 2⁻¹ ^ 12 +
+            2 ^ 140 * i * 𝓛 α ^ 8 := by gcongr
+        _ ≤ finrank (ZMod q) V' + 2 ^ 128 * 𝓛 α ^ 4 * 𝓛 α ^ 4 / 2⁻¹ ^ 12 +
+            2 ^ 140 * i * 𝓛 α ^ 8 := by have := hα₀.trans_le hαβ; gcongr
         _ = _ := by push_cast; ring
     · exact .of_image .subtypeVal Set.injOn_subtype_val (Set.subset_univ _)
         (hB.vadd_set (a := -x) |>.mono <| by simp [B'])
@@ -580,7 +550,7 @@ public theorem ff (hq₃ : 3 ≤ q) (hq : q.Prime) (hA₀ : A.Nonempty) (hA : Th
   rw [hB.wInner_one_mu_ddconv_mu_mu_two_smul_mu] at hBV
   swap
   · simpa [Module.card_eq_pow_finrank (K := ZMod q) (V := V), ZMod.card] using hq'.pow
-  suffices h : (q ^ (n - 2 ^ 155 * 𝓛 α ^ 9) : ℝ) ≤ q ^ (n / 2) by
+  suffices h : (q ^ (n - 2 ^ 147 * 𝓛 α ^ 9) : ℝ) ≤ q ^ (n / 2) by
     rwa [rpow_le_rpow_left_iff ‹_›, sub_le_comm, sub_half, div_le_iff₀' zero_lt_two, ← mul_assoc,
       ← pow_succ'] at h
   calc
@@ -588,18 +558,18 @@ public theorem ff (hq₃ : 3 ≤ q) (hq : q.Prime) (hA₀ : A.Nonempty) (hA : Th
       gcongr
       rw [sub_le_comm]
       calc
-        n - finrank (ZMod q) V ≤ 2 ^ 148 * ⌊𝓛 α / log (65 / 64)⌋₊ * 𝓛 α ^ 8 := by
+        n - finrank (ZMod q) V ≤ 2 ^ 140 * ⌊𝓛 α / log (65 / 64)⌋₊ * 𝓛 α ^ 8 := by
           rwa [sub_le_iff_le_add']
-        _ ≤ 2 ^ 148 * (𝓛 α / log (65 / 64)) * 𝓛 α ^ 8 := by
+        _ ≤ 2 ^ 140 * (𝓛 α / log (65 / 64)) * 𝓛 α ^ 8 := by
           gcongr; exact Nat.floor_le (by positivity)
-        _ = 2 ^ 148 * (log (65 / 64)) ⁻¹ * 𝓛 α ^ 9 := by ring
-        _ ≤ 2 ^ 148 * 2 ^ 7 * 𝓛 α ^ 9 := by
+        _ = 2 ^ 140 * (log (65 / 64)) ⁻¹ * 𝓛 α ^ 9 := by ring
+        _ ≤ 2 ^ 140 * 2 ^ 7 * 𝓛 α ^ 9 := by
           gcongr
           refine inv_le_of_inv_le₀ (by positivity) ?_
           calc
             (2 ^ 7)⁻¹ ≤ 1 - (65 / 64)⁻¹ := by norm_num
             _ ≤ log (65 / 64) := one_sub_inv_le_log_of_pos (by positivity)
-        _ = 2 ^ 155 * 𝓛 α ^ 9 := by ring
+        _ = 2 ^ 147 * 𝓛 α ^ 9 := by ring
     _ = ↑(card V) := by simp [Module.card_eq_pow_finrank (K := ZMod q) (V := V)]
     _ ≤ 2 * β⁻¹ ^ 2 := by
       rw [← natCast_card_mul_nnratCast_dens, mul_pow, mul_inv, ← mul_assoc,
