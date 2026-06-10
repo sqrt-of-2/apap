@@ -1,0 +1,50 @@
+module
+
+public import APAP.Mathlib.Algebra.Module.AddChar
+public import APAP.Mathlib.Algebra.Module.ZMod
+public import APAP.Mathlib.LinearAlgebra.Dimension.Finrank
+public import Mathlib.Analysis.Fourier.FiniteAbelian.PontryaginDuality
+public import Mathlib.Algebra.Field.ZMod
+
+import APAP.Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
+
+public section
+
+open scoped Finset
+
+namespace AddChar
+variable {ι G : Type*} {q : ℕ} [AddCommGroup G] [Module (ZMod q) G] {γ : AddChar G ℂ}
+  {r : ZMod q} {x : G}
+
+variable (q γ) in
+/-- Characters of a `q`-group `G` are (noncanonically) the same as `ZMod q`-linear forms on `G`. -/
+@[expose, simps! -isSimp]
+noncomputable def toZModLinearMap [NeZero q] : G →ₗ[ZMod q] ZMod q :=
+  (zmodAddEquiv.symm.toAddMonoidHom.comp <| γ.toAddMonoidHomAddChar).toZModLinearMap q
+
+@[simp]
+lemma toZModLinearMap_eq_zero [Fact <| 1 < q] : toZModLinearMap q γ x = 0 ↔ γ x = 1 := by
+  simp +contextual only [toZModLinearMap_apply, EmbeddingLike.map_eq_zero_iff, DFunLike.ext_iff,
+    toAddMonoidHomAddChar_apply_apply, map_zmod_smul, zero_apply, iff_iff_implies_and_implies,
+    one_pow, implies_true, and_true]
+  rintro h
+  simpa [ZMod.val_one] using h 1
+
+@[simp]
+lemma ker_toZModLinearMap [Fact <| 1 < q] :
+    (toZModLinearMap q γ).ker = γ.toAddMonoidHom.ker.toZModSubmodule q := by ext; simp
+
+variable [Fact q.Prime] [FiniteDimensional (ZMod q) G] {γ : ι → AddChar G ℂ}
+  {s : Finset ι}
+
+lemma codim_iInf_ker_le_fintypeCard [Fintype ι] :
+    Module.finrank (ZMod q) G - (⨅ i, (γ i).toAddMonoidHom.ker.toZModSubmodule q).finrank
+      ≤ Fintype.card ι := by
+  simpa using Module.codim_iInf_ker_le_fintypeCard (f := fun i ↦ (γ i).toZModLinearMap q)
+
+lemma codim_iInf_ker_le_finsetCard :
+    Module.finrank (ZMod q) G - ((⨅ i ∈ s, (γ i).toAddMonoidHom.ker).toZModSubmodule q).finrank
+      ≤ #s := by
+  simpa [iInf_subtype] using codim_iInf_ker_le_fintypeCard (ι := s) (γ := fun i ↦ γ i)
+
+end AddChar

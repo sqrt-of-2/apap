@@ -11,6 +11,7 @@ public import Mathlib.MeasureTheory.MeasurableSpace.Defs
 
 import AddCombi.Mathlib.Algebra.Order.GroupWithZero.Indicator
 import APAP.Mathlib.Algebra.Order.Group.Parity
+import APAP.Mathlib.Analysis.Fourier.FiniteAbelian.PontryaginDuality
 import APAP.Physics.AlmostPeriodicity
 import APAP.Physics.DRC
 import APAP.Physics.Unbalancing
@@ -189,7 +190,7 @@ public lemma ap_in_ff [DecidableEq G] (hq : q.Prime) (hα₀ : 0 < α) (hα₂ :
   let V : Submodule (ZMod q) G := AddSubgroup.toZModSubmodule _ <| ⨅ γ ∈ Δ, γ.toAddMonoidHom.ker
   let V' : Finset G := Set.toFinset V
   refine ⟨V, inferInstance, ?_, ?_⟩
-  · obtain ⟨Δ', hΔ'Δ, hΔ'card, hfΔ'⟩ : ∃ Δ' ⊆ Δ, _ := chang (mu_ne_zero.2 hT) (by norm_num)
+  · obtain ⟨Δ', -, hΔ'card, hfΔ'⟩ : ∃ Δ' ⊆ Δ, _ := chang (mu_ne_zero.2 hT) (by norm_num)
     let W : Submodule (ZMod q) G := AddSubgroup.toZModSubmodule _ <| ⨅ γ ∈ Δ', γ.toAddMonoidHom.ker
     have mem_W {x} : x ∈ W ↔ ∀ γ ∈ Δ', γ x = 1 := by simp [W]
     have hWV : W ≤ V := by
@@ -221,10 +222,11 @@ public lemma ap_in_ff [DecidableEq G] (hq : q.Prime) (hα₀ : 0 < α) (hα₂ :
             _ = 2 ^ 3 * 𝓛 (ε * α) := by ring
       _ = 2 ^ 19 * 𝓛 α ^ 2 * 𝓛 (ε * α) ^ 2 * ε⁻¹ ^ 2 := by ring_nf
     calc
-      (↑(finrank (ZMod q) G - finrank (ZMod q) V) : ℝ)
-        ≤ ↑(finrank (ZMod q) G - finrank (ZMod q) W) := by
-        gcongr; exact Submodule.finrank_mono hWV
-      _ ≤ #Δ' := sorry
+      (↑(finrank (ZMod q) G - V.finrank) : ℝ)
+        ≤ ↑(finrank (ZMod q) G - W.finrank) := by gcongr; exact Submodule.finrank_mono hWV
+      _ ≤ #Δ' := by
+        let : Fact q.Prime := ⟨hq⟩
+        simpa [W] using AddChar.codim_iInf_ker_le_finsetCard (s := Δ') 
       _ ≤ ⌈changConst * exp 1 * ⌈𝓛 ↑(‖μ T‖_[1] ^ 2 / ‖μ T‖_[2] ^ 2 / card G)⌉₊ / 2⁻¹ ^ 2⌉₊ := by
         gcongr
       _ = ⌈2 ^ 7 * exp 1 ^ 2 * ⌈𝓛 T.dens⌉₊⌉₊ := by
