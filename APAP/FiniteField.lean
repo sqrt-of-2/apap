@@ -192,7 +192,12 @@ public lemma ap_in_ff [DecidableEq G] (hq : q.Prime) (hα₀ : 0 < α) (hα₂ :
   · obtain ⟨Δ', hΔ'Δ, hΔ'card, hfΔ'⟩ : ∃ Δ' ⊆ Δ, _ := chang (mu_ne_zero.2 hT) (by norm_num)
     let W : Submodule (ZMod q) G := AddSubgroup.toZModSubmodule _ <| ⨅ γ ∈ Δ', γ.toAddMonoidHom.ker
     have mem_W {x} : x ∈ W ↔ ∀ γ ∈ Δ', γ x = 1 := by simp [W]
-    have hWV : W ≤ V := by sorry
+    have hWV : W ≤ V := by
+      simp only [map_iInf, SetLike.le_def, Submodule.mem_iInf, AddSubgroup.mem_toZModSubmodule,
+        AddMonoidHom.mem_ker, AddChar.toAddMonoidHom_apply, ofMul_eq_zero, W, V]
+      intro x hx γ hγ
+      obtain ⟨coeff, -, rfl⟩ := Finset.mem_addSpan.1 <| hfΔ' hγ
+      rw [AddChar.sum_apply, Finset.prod_eq_one <| by simp_all]
     have := calc
       log T.dens⁻¹ ≤ log (α⁻¹ ^ (-4096 * ⌈𝓛 (min 1 (#A₂ / #S))⌉ * k ^ 2 / ε ^ 2))⁻¹ := by
         gcongr; rwa [nnratCast_dens, le_div_iff₀]; positivity
