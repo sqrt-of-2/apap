@@ -26,8 +26,8 @@ import Mathlib.Algebra.Group.Pointwise.Finset.Density
 import Mathlib.Algebra.Order.Floor.Semifield
 import Mathlib.Analysis.Complex.ExponentialBounds
 import Mathlib.Data.Real.StarOrdered
-import Mathlib.MeasureTheory.Integral.Bochner.Basic
 import Mathlib.FieldTheory.Finiteness
+import Mathlib.MeasureTheory.Integral.Bochner.Basic
 
 /-!
 # Finite field case
@@ -44,22 +44,21 @@ variable {G : Type u} [AddCommGroup G] [Fintype G] {A C : Finset G} {x y γ ε :
 
 local notation "𝓛" x:arg => 1 + log x⁻¹
 
-private lemma one_le_curlog (hx₀ : 0 ≤ x) (hx₁ : x ≤ 1) : 1 ≤ 𝓛 x := by
+lemma one_le_curlog (hx₀ : 0 ≤ x) (hx₁ : x ≤ 1) : 1 ≤ 𝓛 x := by
   obtain rfl | hx₀ := hx₀.eq_or_lt
   · simp
   have : 0 ≤ log x⁻¹ := by bound
   linarith
 
-private lemma curlog_pos (hx₀ : 0 ≤ x) (hx₁ : x ≤ 1) : 0 < 𝓛 x := by
+lemma curlog_pos (hx₀ : 0 ≤ x) (hx₁ : x ≤ 1) : 0 < 𝓛 x := by
   obtain rfl | hx₀ := hx₀.eq_or_lt
   · simp
   have : 0 ≤ log x⁻¹ := by bound
   positivity
 
-set_option linter.flexible false in
-private lemma rpow_inv_neg_curlog_le (hx₀ : 0 ≤ x) (hx₁ : x ≤ 1) : x⁻¹ ^ (𝓛 x)⁻¹ ≤ exp 1 := by
+lemma rpow_inv_neg_curlog_le (hx₀ : 0 ≤ x) (hx₁ : x ≤ 1) : x⁻¹ ^ (𝓛 x)⁻¹ ≤ exp 1 := by
   obtain rfl | hx₀ := hx₀.eq_or_lt
-  · simp; positivity
+  · simp [(exp_pos _).le]
   obtain rfl | hx₁ := hx₁.eq_or_lt
   · simp
   have hx := (one_lt_inv₀ hx₀).2 hx₁
@@ -71,7 +70,7 @@ private lemma rpow_inv_neg_curlog_le (hx₀ : 0 ≤ x) (hx₁ : x ≤ 1) : x⁻�
       · simp
     _ ≤ exp 1 := x⁻¹.rpow_inv_log_le_exp_one
 
-private lemma curlog_mul_le (hx₀ : 0 < x) (hx₁ : x ≤ 1) (hy₀ : 0 < y) (hy₁ : y ≤ 1) :
+lemma curlog_mul_le (hx₀ : 0 < x) (hx₁ : x ≤ 1) (hy₀ : 0 < y) (hy₁ : y ≤ 1) :
     𝓛 (x * y) ≤ x⁻¹ * 𝓛 y := by
   suffices h : log x⁻¹ - (x⁻¹ - 1) ≤ (x⁻¹ - 1) * log y⁻¹ by
     rw [← sub_nonneg] at h ⊢
@@ -83,11 +82,10 @@ private lemma curlog_mul_le (hx₀ : 0 < x) (hx₁ : x ≤ 1) (hy₀ : 0 < y) (h
     log x⁻¹ - (x⁻¹ - 1) ≤ 0 := sub_nonpos.2 <| log_le_sub_one_of_pos <| by positivity
     _ ≤ (x⁻¹ - 1) * log y⁻¹ := mul_nonneg (sub_nonneg.2 <| (one_le_inv₀ hx₀).2 hx₁) <| by bound
 
-private lemma curlog_div_le (hx₀ : 0 < x) (hx₁ : x ≤ 1) (hy : 1 ≤ y) :
-    𝓛 (x / y) ≤ y * 𝓛 x := by
+lemma curlog_div_le (hx₀ : 0 < x) (hx₁ : x ≤ 1) (hy : 1 ≤ y) : 𝓛 (x / y) ≤ y * 𝓛 x := by
   simpa [div_eq_inv_mul] using curlog_mul_le (by positivity) (inv_le_one_of_one_le₀ hy) hx₀ hx₁
 
-private lemma curlog_rpow_le' (hx₀ : 0 < x) (hx₁ : x ≤ 1) (hy₀ : 0 < y) (hy₁ : y ≤ 1) :
+lemma curlog_rpow_le' (hx₀ : 0 < x) (hx₁ : x ≤ 1) (hy₀ : 0 < y) (hy₁ : y ≤ 1) :
     𝓛 (x ^ y) ≤ y⁻¹ * 𝓛 x := by
   suffices h : 1 - y⁻¹ ≤ (y⁻¹ - y) * log x⁻¹ by
     rw [← sub_nonneg] at h ⊢
@@ -99,12 +97,10 @@ private lemma curlog_rpow_le' (hx₀ : 0 < x) (hx₁ : x ≤ 1) (hy₀ : 0 < y) 
     1 - y⁻¹ ≤ 0 := sub_nonpos.2 <| (one_le_inv₀ hy₀).2 hy₁
     _ ≤ (y⁻¹ - y) * log x⁻¹ := mul_nonneg (sub_nonneg.2 <| hy₁.trans <| by bound) <| by bound
 
-private lemma curlog_rpow_le (hx₀ : 0 < x) (hy : 1 ≤ y) : 𝓛 (x ^ y) ≤ y * 𝓛 x := by
-  rw [← inv_rpow, log_rpow, mul_one_add]
-  any_goals positivity
-  gcongr
+lemma curlog_rpow_le (hx₀ : 0 < x) (hy : 1 ≤ y) : 𝓛 (x ^ y) ≤ y * 𝓛 x := by
+  grw [← inv_rpow, log_rpow, mul_one_add, hy] <;> positivity
 
-private lemma curlog_pow_le {n : ℕ} (hx₀ : 0 < x) (hn : n ≠ 0) : 𝓛 (x ^ n) ≤ n * 𝓛 x := by
+lemma curlog_pow_le {n : ℕ} (hx₀ : 0 < x) (hn : n ≠ 0) : 𝓛 (x ^ n) ≤ n * 𝓛 x := by
   rw [← rpow_natCast]; exact curlog_rpow_le hx₀ <| mod_cast Nat.one_le_iff_ne_zero.2 hn
 
 set_option backward.isDefEq.respectTransparency false in
