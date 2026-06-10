@@ -155,7 +155,7 @@ lemma iterCConv_add (f : G → R) (m : ℕ) : ∀ n, f ∗^ₙ (m + n) = f ∗^�
   | 0 => by simp
   | n + 1 => by simp [← add_assoc, iterCConv_succ', iterCConv_add, conv_left_comm]
 
-lemma iterCConv_mul (f : G → R) (m : ℕ) : ∀ n, f ∗^ₙ (m * n) = f ∗^ₙ m ∗^ₙ n
+lemma iterCConv_mul (f : G → R) (m : ℕ) : ∀ n : ℕ, f ∗^ₙ (m * n) = f ∗^ₙ m ∗^ₙ n
   | 0 => rfl
   | n + 1 => by simp [mul_add_one, iterCConv_succ, iterCConv_add, iterCConv_mul]
 

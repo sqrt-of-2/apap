@@ -4,8 +4,6 @@ public import Mathlib.Algebra.Group.Translate
 public import Mathlib.Algebra.Star.Conjneg
 public import Mathlib.Analysis.RCLike.Basic
 public import Mathlib.Data.Complex.Basic
--- FIXME: This public import shouldn't be needed.
-public import Mathlib.Data.Matrix.Mul
 public import Mathlib.Data.NNReal.Star
 
 import Mathlib.Analysis.Complex.Basic
@@ -428,7 +426,7 @@ lemma iterConv_add (f : G → R) (m : ℕ) : ∀ n, f ∗ᵈ^ (m + n) = f ∗ᵈ
   | 0 => by simp
   | n + 1 => by simp [← add_assoc, iterConv_succ', iterConv_add, ddconv_left_comm]
 
-lemma iterConv_mul (f : G → R) (m : ℕ) : ∀ n, f ∗ᵈ^ (m * n) = f ∗ᵈ^ m ∗ᵈ^ n
+lemma iterConv_mul (f : G → R) (m : ℕ) : ∀ n : ℕ, f ∗ᵈ^ (m * n) = f ∗ᵈ^ m ∗ᵈ^ n
   | 0 => rfl
   | n + 1 => by simp [mul_add_one, iterConv_succ, iterConv_add, iterConv_mul]
 
