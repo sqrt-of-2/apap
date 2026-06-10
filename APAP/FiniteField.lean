@@ -257,7 +257,7 @@ public lemma ap_in_ff [DecidableEq G] (hq₃ : 3 ≤ q) (hq : q.Prime) (hα₀ :
         ← dddconv_wInner_one_eq_wInner_one_ddconv, wInner_one_dddconv_eq_ddconv_wInner_one,
         ← ddconv_conjneg, conjneg_mu, this, ddconv_comm]
     have : ∑ x ∈ S, (μ_[ℝ] A₁ ∗ᵈ μ A₂) x = (μ_[ℝ] A₁ ∗ᵈ μ A₂ ○ᵈ 𝟭_[S]) 0 := by
-      simp [dddconv_indicator_one]
+      simp [dddconv_indicator_one_eq_sum]
     sorry
 
 lemma ap_in_ff' [DecidableEq G] (hq₃ : 3 ≤ q) (hq : q.Prime) (hα₀ : 0 < α) (hα₂ : α ≤ 2⁻¹)

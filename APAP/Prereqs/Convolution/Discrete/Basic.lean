@@ -85,8 +85,13 @@ lemma indicator_one_dddconv_Set.indicator_apply (s t : Finset G) (a : G) :
 lemma indicator_one_dddconv (s : Finset G) (f : G → R) : 𝟭_[s] ○ᵈ f = ∑ a ∈ s, τ a (conjneg f) := by
   ext; simp [dddconv_eq_sum_sub', Set.indicator_apply]
 
-lemma dddconv_indicator_one (f : G → R) (s : Finset G) : f ○ᵈ 𝟭_[s] = ∑ a ∈ s, τ (-a) f := by
+lemma dddconv_indicator_one_eq_sum (f : G → R) (s : Finset G) :
+    f ○ᵈ 𝟭_[s] = ∑ a ∈ s, τ (-a) f := by
   ext; simp [dddconv_eq_sum_add, Set.indicator_apply]
+
+lemma dddconv_indicator_one (f : G → R) (s : Finset G) : f ○ᵈ 𝟭_[s] = f ∗ᵈ 𝟭_[-s] := by
+  rw [← ddconv_conjneg]
+  simp
 
 end CommSemiring
 
@@ -112,7 +117,7 @@ lemma mu_dddconv (s : Finset G) (f : G → R) :
   simp [mu, indicator_one_dddconv, smul_dddconv]
 
 lemma dddconv_mu (f : G → R) (s : Finset G) : f ○ᵈ μ s = (#s : R)⁻¹ • ∑ a ∈ s, τ (-a) f := by
-  simp [mu, dddconv_indicator_one, dddconv_smul]
+  simp [mu, dddconv_indicator_one_eq_sum, dddconv_smul]
 
 end Semifield
 
